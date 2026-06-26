@@ -124,14 +124,6 @@ ESTILOS_ARTE = {
     "Minimalista": "Design minimalista, limpo, moderno",
 }
 
-# MODELOS DE IMAGEM
-MODELOS_IMAGEM = {
-    "DALL-E 3": "DALL-E 3 (Openai) - Ultra realista",
-    "Gemini Vision": "Google Gemini - Balanceado",
-    "Midjourney": "Midjourney - Artístico premium",
-    "Stable Diffusion": "Stable Diffusion - Rápido",
-}
-
 # HEADER
 st.markdown("""
     <div class="header-card">
@@ -220,26 +212,16 @@ with tab1:
     
     st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
     
-    # SECAO 4: IMAGENS E ARTE
-    st.markdown("<div class='section-title'>4. Configuracao de Imagens</div>", unsafe_allow_html=True)
+    # SECAO 4: ESTILO VISUAL
+    st.markdown("<div class='section-title'>4. Estilo Visual (para suas imagens)</div>", unsafe_allow_html=True)
     
-    col1, col2 = st.columns(2)
+    estilo_arte = st.selectbox(
+        "Escolha o estilo de arte para as imagens",
+        list(ESTILOS_ARTE.keys()),
+        label_visibility="collapsed"
+    )
     
-    with col1:
-        estilo_arte = st.selectbox(
-            "Estilo de Arte",
-            list(ESTILOS_ARTE.keys()),
-            label_visibility="collapsed"
-        )
-    
-    with col2:
-        modelo_imagem = st.selectbox(
-            "Modelo de IA para Imagens",
-            list(MODELOS_IMAGEM.keys()),
-            label_visibility="collapsed"
-        )
-    
-    st.info(f"Estilo: {ESTILOS_ARTE[estilo_arte]}\nModelo: {MODELOS_IMAGEM[modelo_imagem]}")
+    st.info(f"Estilo selecionado: {ESTILOS_ARTE[estilo_arte]}")
     
     st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
     
@@ -251,7 +233,7 @@ with tab1:
     with col1:
         formato_txt = st.checkbox("TXT", value=True)
     with col2:
-        formato_word = st.checkbox("Word", value=True)
+        formato_word = st.checkbox("Word (com espacos para imagens)", value=True)
     with col3:
         formato_pdf = st.checkbox("PDF", value=True)
     
@@ -280,24 +262,27 @@ with tab1:
 
 PARAMETROS EXATOS:
 - Numero de capitulos: {num_chapters}
-- Palavras por capitulo: {palavras_capitulo}
+- Palavras por capitulo: {palavras_capitulo} aproximadamente
 - Estilo: {estilo}
-- Estilo de arte: {ESTILOS_ARTE[estilo_arte]}
+- Estilo visual das imagens: {ESTILOS_ARTE[estilo_arte]}
 
 ESTRUTURA OBRIGATORIA:
-- TITULO: (titulo atrativo e profissional)
-- INTRODUCAO: (2-3 paragrafos inspiradores em {idioma})
+- CAPA: [Deixar espaco para imagem de capa]
+- TITULO: (titulo atrativo)
+- INTRODUCAO: (2-3 paragrafos em {idioma})
 - {num_chapters} CAPITULOS:
+  * CAPITULO N: [Deixar espaco para imagem relacionada]
   * Titulo do capitulo
-  * Conteudo com aproximadamente {palavras_capitulo} palavras
+  * Conteudo com ~{palavras_capitulo} palavras
   * Adaptado para {regiao}
   * 3 dicas praticas
-- CONCLUSAO: (mensagem final inspiradora)
-- BONUS: (5 dicas extras para {audience})
+- CONCLUSAO: (mensagem final)
+- BONUS: (5 dicas extras)
+- CREDITOS DE IMAGENS: [Espaco para creditos das imagens]
 
 Escreva COMPLETAMENTE em {idioma}.
 Use linguagem apropriada para {regiao}.
-Seja profissional, detalhado e altamente pratico."""
+Deixe claro onde as imagens devem ser inseridas."""
                     
                     response = model.generate_content(prompt)
                     content = response.text
@@ -305,6 +290,18 @@ Seja profissional, detalhado e altamente pratico."""
                     
                     progress_bar.progress(70)
                     status_text.text("Processando conteudo...")
+                    
+                    # Gerar sugestoes de imagens
+                    prompt_imagens = f"""Baseado neste ebook sobre '{tema_desc}', gere 10 prompts de imagem para usar em Canva, DALL-E ou Midjourney.
+
+Formato:
+1. [Titulo da imagem]: [Descricao detalhada em {idioma} usando estilo {ESTILOS_ARTE[estilo_arte]}]
+
+PROMPTS:
+1. Capa do Ebook: Uma imagem que represente {tema_desc} em estilo {ESTILOS_ARTE[estilo_arte]}"""
+                    
+                    response_imagens = model.generate_content(prompt_imagens)
+                    sugestoes_imagens = response_imagens.text
                     
                     # Adicionar ao historico
                     ebook_data = {
@@ -316,8 +313,8 @@ Seja profissional, detalhado e altamente pratico."""
                         "capitulos": num_chapters,
                         "palavras": palavras_capitulo,
                         "estilo_arte": estilo_arte,
-                        "modelo": modelo_imagem,
-                        "conteudo": content
+                        "conteudo": content,
+                        "sugestoes_imagens": sugestoes_imagens
                     }
                     st.session_state.ebooks.append(ebook_data)
                     
@@ -328,11 +325,19 @@ Seja profissional, detalhado e altamente pratico."""
                 st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
                 st.success("Ebook gerado com sucesso!")
                 
-                # PREVIEW
-                with st.expander("Ver Preview", expanded=True):
-                    st.write(content[:1200] + "...")
+                # TABS DE RESULTADO
+                res_col1, res_col2 = st.tabs(["Conteudo do Ebook", "Prompts de Imagens"])
+                
+                with res_col1:
+                    with st.expander("Ver Conteudo Completo", expanded=True):
+                        st.write(content)
+                
+                with res_col2:
+                    with st.expander("Ver Sugestoes de Imagens para Canva/DALL-E", expanded=True):
+                        st.write(sugestoes_imagens)
                 
                 # DOWNLOADS
+                st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
                 st.markdown("### Download seu Ebook")
                 
                 col_d1, col_d2, col_d3 = st.columns(3)
@@ -340,7 +345,7 @@ Seja profissional, detalhado e altamente pratico."""
                 # TXT
                 if formato_txt:
                     with col_d1:
-                        txt = f"{tema_nome}\n\nPor Luciana Britto | L&B Marketing\nIdioma: {idioma}\nRegiao: {regiao}\nCapitulos: {num_chapters}\n{datetime.now().strftime('%d/%m/%Y')}\n\n{content}\n\nCopyright 2026 Luciana Britto | L&B Marketing"
+                        txt = f"{tema_nome}\n\nPor Luciana Britto | L&B Marketing\nIdioma: {idioma}\nRegiao: {regiao}\nCapitulos: {num_chapters}\nEstilo de Imagens: {estilo_arte}\n{datetime.now().strftime('%d/%m/%Y')}\n\n{content}\n\n--- SUGESTOES DE IMAGENS ---\n{sugestoes_imagens}\n\nCopyright 2026 Luciana Britto | L&B Marketing"
                         st.download_button(
                             "Download TXT",
                             txt,
@@ -349,13 +354,16 @@ Seja profissional, detalhado e altamente pratico."""
                             use_container_width=True
                         )
                 
-                # WORD
+                # WORD COM ESPACOS PARA IMAGENS
                 if formato_word:
                     with col_d2:
                         doc = Document()
+                        
+                        # Titulo
                         title = doc.add_heading(tema_nome, 0)
                         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
                         
+                        # Info
                         info = doc.add_paragraph()
                         info.add_run("Por Luciana Britto | L&B Marketing\n").bold = True
                         info.add_run(f"Idioma: {idioma} | Regiao: {regiao}\n")
@@ -364,7 +372,15 @@ Seja profissional, detalhado e altamente pratico."""
                         info.alignment = WD_ALIGN_PARAGRAPH.CENTER
                         
                         doc.add_paragraph()
+                        doc.add_paragraph("[ESPACO RESERVADO PARA CAPA - Insira imagem aqui em Canva ou Word]").italic = True
+                        doc.add_paragraph()
+                        
+                        # Conteudo
                         doc.add_paragraph(content)
+                        
+                        doc.add_page_break()
+                        doc.add_heading("Sugestoes de Imagens para Adicionar", level=1)
+                        doc.add_paragraph(sugestoes_imagens)
                         
                         doc_bytes = BytesIO()
                         doc.save(doc_bytes)
@@ -373,7 +389,7 @@ Seja profissional, detalhado e altamente pratico."""
                         st.download_button(
                             "Download Word",
                             doc_bytes.getvalue(),
-                            f"{tema_nome}_{idioma}.docx",
+                            f"{tema_nome}_{idioma}_COM_ESPACOS.docx",
                             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                             use_container_width=True
                         )
@@ -412,6 +428,9 @@ Seja profissional, detalhado e altamente pratico."""
                         story.append(Paragraph(f"{datetime.now().strftime('%d de %B de %Y')}", styles['Normal']))
                         story.append(PageBreak())
                         story.append(Paragraph(content, body_style))
+                        story.append(PageBreak())
+                        story.append(Paragraph("Sugestoes de Imagens", title_style))
+                        story.append(Paragraph(sugestoes_imagens, body_style))
                         
                         doc.build(story)
                         buffer.seek(0)
@@ -442,7 +461,7 @@ with tab2:
                 col1, col2 = st.columns([3, 1])
                 with col1:
                     st.write(f"**Publico:** {ebook['publico']}")
-                    st.write(f"**Estilo:** {ebook['estilo_arte']} | **Modelo:** {ebook['modelo']}")
+                    st.write(f"**Estilo de Imagens:** {ebook['estilo_arte']}")
                     st.write(f"**Palavras por capitulo:** {ebook['palavras']}")
                     st.write(ebook['conteudo'][:500] + "...")
                 with col2:
@@ -490,40 +509,43 @@ with tab3:
     
     st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
     
-    st.markdown("### Opcoes Avancadas Disponiveis")
+    st.markdown("### Como Usar Este Gerador")
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
-        **Estrutura Flexivel**
-        - 2 a 10 capitulos
-        - 200 a 1200 palavras por capitulo
-        - Ajuste fino do tamanho
+        **1. Gere o Ebook**
+        - Escolha tema, idioma, capitulos
+        - IA gera conteudo profissional
         
-        **Multiplos Idiomas**
-        - Portugues
-        - Ingles
-        - Espanhol
-        - Frances
-        - Italiano
+        **2. Baixe em Word**
+        - Arquivo pronto para editar
+        - Espacos marcados para imagens
+        - Estrutura profissional
+        
+        **3. Obtenha Sugestoes**
+        - Prompts prontos para Canva
+        - Descrições detalhadas
+        - Estilos personalizados
         """)
     
     with col2:
         st.markdown("""
-        **Estilos de Arte**
-        - Foto (realista)
-        - Ilustracao (artistico)
-        - Abstrato (moderno)
-        - Digital (futurista)
-        - Aquarela (suave)
-        - Minimalista (limpo)
+        **4. Adicione Imagens em Canva**
+        - Use os prompts sugeridos
+        - Crie design profissional
+        - Mantenha consistencia visual
         
-        **Modelos de IA**
-        - DALL-E 3 (ultra real)
-        - Gemini Vision (balanceado)
-        - Midjourney (premium)
-        - Stable Diffusion (rapido)
+        **5. Exporte e Venda**
+        - PDF pronto para vender
+        - Gumroad, Hotmart, etc
+        - Comece a ganhar!
+        
+        **6. Repita**
+        - Gere novos ebooks
+        - Crie sua biblioteca
+        - Escale o negocio
         """)
 
 # FOOTER
@@ -534,7 +556,7 @@ st.markdown("""
             <strong>Luciana Britto | L&B Marketing - Estrategias de Valor</strong>
         </p>
         <p style="margin: 8px 0 0 0; font-size: 12px; opacity: 0.7;">
-            Copyright 2026 - Ferramenta PRO Premium de IA para Empreendoras
+            Copyright 2026 - Ferramenta PRO Premium de IA para Empreendoras - Com Espacos para Imagens
         </p>
     </div>
 """, unsafe_allow_html=True)
