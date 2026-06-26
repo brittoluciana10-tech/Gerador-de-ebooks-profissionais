@@ -95,18 +95,18 @@ if "current_content" not in st.session_state:
 
 # TEMAS
 TEMAS = {
-    "🤰 Maternidade Real": "Maternidade real, mães, experiências honestas",
-    "👶 Sono do Bebé": "Sono infantil, técnicas de dormir, rotina",
-    "💪 Pós-parto": "Recuperação pós-parto, saúde, bem-estar",
-    "📚 Parenting": "Educação infantil, desenvolvimento, parentalidade",
-    "💰 Renda Variável": "Renda extra, freelance, negócios digitais",
-    "🧘 Bem-estar": "Mindfulness, meditação, saúde mental",
-    "💼 Autónomo": "Ser autónomo, gestão, financeiro",
-    "⚖️ Peso Saudável": "Perda de peso, fitness, saúde, nutrição",
-    "🎨 Criatividade": "Criatividade, inovação, arte, inspiração",
-    "💳 Finanças": "Educação financeira, investimentos, economia",
-    "❤️ Relacionamentos": "Relacionamentos, amor, comunicação",
-    "🚀 Carreira": "Carreira, emprego, desenvolvimento profissional",
+    "Maternidade Real": "Maternidade real, mães, experiências honestas",
+    "Sono do Bebé": "Sono infantil, técnicas de dormir, rotina",
+    "Pós-parto": "Recuperação pós-parto, saúde, bem-estar",
+    "Parenting": "Educação infantil, desenvolvimento, parentalidade",
+    "Renda Variável": "Renda extra, freelance, negócios digitais",
+    "Bem-estar": "Mindfulness, meditação, saúde mental",
+    "Autónomo": "Ser autónomo, gestão, financeiro",
+    "Peso Saudável": "Perda de peso, fitness, saúde, nutrição",
+    "Criatividade": "Criatividade, inovação, arte, inspiração",
+    "Finanças": "Educação financeira, investimentos, economia",
+    "Relacionamentos": "Relacionamentos, amor, comunicação",
+    "Carreira": "Carreira, emprego, desenvolvimento profissional",
 }
 
 # HEADER
@@ -118,7 +118,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # TABS
-tab1, tab2, tab3 = st.tabs(["🆕 Criar Ebook", "📚 Meus Ebooks", "📊 Dashboard"])
+tab1, tab2, tab3 = st.tabs(["Criar Ebook", "Meus Ebooks", "Dashboard"])
 
 # TAB 1: CRIAR EBOOK
 with tab1:
@@ -128,13 +128,12 @@ with tab1:
     
     with col1:
         st.markdown("### Configurar seu Ebook")
-        tema_option = st.selectbox(
+        tema_nome = st.selectbox(
             "Escolha o tema",
             list(TEMAS.keys()),
             label_visibility="collapsed"
         )
-        tema_nome = tema_option.split(" ", 1)[1]
-        tema_desc = TEMAS[tema_option]
+        tema_desc = TEMAS[tema_nome]
     
     with col2:
         st.markdown("### Público")
@@ -149,7 +148,7 @@ with tab1:
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        num_chapters = st.slider("📑 Capítulos", 2, 5, 3, label_visibility="collapsed")
+        num_chapters = st.slider("Capitulos", 2, 5, 3, label_visibility="collapsed")
     
     with col2:
         st.markdown("**Download**")
@@ -157,16 +156,16 @@ with tab1:
         formato_word = st.checkbox("Word", value=True)
     
     with col3:
-        st.markdown("**Opções**")
+        st.markdown("**Opcoes**")
         formato_pdf = st.checkbox("PDF", value=True)
-        estilo = st.selectbox("Estilo", ["Profissional", "Descontraído", "Científico"], label_visibility="collapsed")
+        estilo = st.selectbox("Estilo", ["Profissional", "Descontraido", "Cientifico"], label_visibility="collapsed")
     
     st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
     
     # BOTAO GERAR
     col_btn = st.columns([1, 2, 1])
     with col_btn[1]:
-        if st.button("🚀 Gerar Ebook Premium", use_container_width=True, key="generate_btn"):
+        if st.button("Gerar Ebook Premium", use_container_width=True, key="generate_btn"):
             try:
                 api_key = st.secrets["GEMINI_API_KEY"]
                 genai.configure(api_key=api_key)
@@ -178,24 +177,24 @@ with tab1:
                 progress_bar = st.progress(0)
                 status_text = st.empty()
                 
-                with st.spinner("⏳ Gerando conteúdo com IA..."):
-                    status_text.text("Conectando à IA...")
+                with st.spinner("Gerando conteudo com IA..."):
+                    status_text.text("Conectando a IA...")
                     progress_bar.progress(25)
                     
                     prompt = f"""Crie um ebook PROFISSIONAL sobre '{tema_desc}' para '{audience}'.
 
-ESTRUTURA OBRIGATÓRIA:
-- TITULO: (título atrativo e profissional)
-- INTRODUÇÃO: (2-3 parágrafos inspiradores)
-- {num_chapters} CAPÍTULOS:
-  - Título do capítulo
-  - Conteúdo detalhado (400+ palavras)
-  - 3 dicas práticas
-- CONCLUSÃO: (mensagem final inspiradora)
-- BÓNUS: (5 dicas extras)
+ESTRUTURA OBRIGATORIA:
+- TITULO: (titulo atrativo e profissional)
+- INTRODUCAO: (2-3 paragrafos inspiradores)
+- {num_chapters} CAPITULOS:
+  * Titulo do capitulo
+  * Conteudo detalhado (400+ palavras)
+  * 3 dicas praticas
+- CONCLUSAO: (mensagem final inspiradora)
+- BONUS: (5 dicas extras)
 
 ESTILO: {estilo}
-QUALIDADE: Profissional, detalhado e altamente prático
+QUALIDADE: Profissional, detalhado e altamente pratico
 FOCO: Resolver problemas reais de '{audience}'"""
                     
                     response = model.generate_content(prompt)
@@ -203,15 +202,15 @@ FOCO: Resolver problemas reais de '{audience}'"""
                     st.session_state.current_content = content
                     
                     progress_bar.progress(70)
-                    status_text.text("Processando conteúdo...")
+                    status_text.text("Processando conteudo...")
                     
-                    # Adicionar ao histórico
+                    # Adicionar ao historico
                     ebook_data = {
                         "id": len(st.session_state.ebooks) + 1,
                         "tema": tema_nome,
                         "data": datetime.now().strftime("%d/%m/%Y %H:%M"),
-                        "público": audience,
-                        "capítulos": num_chapters,
+                        "publico": audience,
+                        "capitulos": num_chapters,
                         "conteudo": content
                     }
                     st.session_state.ebooks.append(ebook_data)
@@ -221,23 +220,23 @@ FOCO: Resolver problemas reais de '{audience}'"""
                 
                 # RESULTADO
                 st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
-                st.success("✅ Ebook gerado com sucesso!")
+                st.success("Ebook gerado com sucesso!")
                 
                 # PREVIEW
-                with st.expander("👁️ Ver Preview", expanded=True):
+                with st.expander("Ver Preview", expanded=True):
                     st.write(content[:1000] + "...")
                 
                 # DOWNLOADS
-                st.markdown("### 📥 Download seu Ebook")
+                st.markdown("### Download seu Ebook")
                 
                 col_d1, col_d2, col_d3 = st.columns(3)
                 
                 # TXT
                 if formato_txt:
                     with col_d1:
-                        txt = f"{tema_nome}\n\nPor Luciana Britto | L&B Marketing\n{datetime.now().strftime('%d/%m/%Y')}\n\n{content}\n\n© 2026 Luciana Britto | L&B Marketing"
+                        txt = f"{tema_nome}\n\nPor Luciana Britto | L&B Marketing\n{datetime.now().strftime('%d/%m/%Y')}\n\n{content}\n\nCopyright 2026 Luciana Britto | L&B Marketing"
                         st.download_button(
-                            "📥 Download TXT",
+                            "Download TXT",
                             txt,
                             f"{tema_nome}.txt",
                             "text/plain",
@@ -250,7 +249,7 @@ FOCO: Resolver problemas reais de '{audience}'"""
                         doc = Document()
                         title = doc.add_heading(tema_nome, 0)
                         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                        subtitle = doc.add_paragraph(f"Por Luciana Britto | L&B Marketing")
+                        subtitle = doc.add_paragraph("Por Luciana Britto | L&B Marketing")
                         subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
                         doc.add_paragraph(f"Gerado em {datetime.now().strftime('%d/%m/%Y')}")
                         doc.add_paragraph()
@@ -261,7 +260,7 @@ FOCO: Resolver problemas reais de '{audience}'"""
                         doc_bytes.seek(0)
                         
                         st.download_button(
-                            "📄 Download Word",
+                            "Download Word",
                             doc_bytes.getvalue(),
                             f"{tema_nome}.docx",
                             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -297,8 +296,8 @@ FOCO: Resolver problemas reais de '{audience}'"""
                         
                         story.append(Paragraph(tema_nome, title_style))
                         story.append(Spacer(1, 0.2*inch))
-                        story.append(Paragraph("<i>Por Luciana Britto | L&B Marketing</i>", styles['Normal']))
-                        story.append(Paragraph(f"<i>{datetime.now().strftime('%d de %B de %Y')}</i>", styles['Normal']))
+                        story.append(Paragraph("Por Luciana Britto | L&B Marketing", styles['Normal']))
+                        story.append(Paragraph(f"{datetime.now().strftime('%d de %B de %Y')}", styles['Normal']))
                         story.append(PageBreak())
                         story.append(Paragraph(content, body_style))
                         
@@ -306,7 +305,7 @@ FOCO: Resolver problemas reais de '{audience}'"""
                         buffer.seek(0)
                         
                         st.download_button(
-                            "🎨 Download PDF",
+                            "Download PDF",
                             buffer.getvalue(),
                             f"{tema_nome}.pdf",
                             "application/pdf",
@@ -314,24 +313,25 @@ FOCO: Resolver problemas reais de '{audience}'"""
                         )
                 
             except Exception as e:
-                st.error(f"❌ Erro: {str(e)}")
+                st.error(f"Erro: {str(e)}")
 
 # TAB 2: MEUS EBOOKS
 with tab2:
     st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
     
     if len(st.session_state.ebooks) == 0:
-        st.info("📭 Nenhum ebook criado ainda. Comece agora!")
+        st.info("Nenhum ebook criado ainda. Comece agora!")
     else:
-        st.markdown(f"### 📚 Total: {len(st.session_state.ebooks)} Ebooks")
+        st.markdown(f"### Total: {len(st.session_state.ebooks)} Ebooks")
         
         for ebook in reversed(st.session_state.ebooks):
-            with st.expander(f"📖 **{ebook['tema']}** • {ebook['público']} • {ebook['data']}", expanded=False):
+            titulo_expander = f"EBOOK: {ebook['tema']} - {ebook['publico']} - {ebook['data']}"
+            with st.expander(titulo_expander, expanded=False):
                 col1, col2 = st.columns([3, 1])
                 with col1:
                     st.write(ebook['conteudo'][:500] + "...")
                 with col2:
-                    if st.button(f"Ver +", key=f"view_{ebook['id']}"):
+                    if st.button(f"Ver Completo", key=f"view_{ebook['id']}"):
                         st.write(ebook['conteudo'])
 
 # TAB 3: DASHBOARD
@@ -341,63 +341,64 @@ with tab3:
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.markdown("""
+        st.markdown(f"""
             <div class="metric-card">
-                <h3 style="margin: 0;">{}</h3>
+                <h3 style="margin: 0;">{len(st.session_state.ebooks)}</h3>
                 <p style="margin: 0; font-size: 12px;">Ebooks Criados</p>
             </div>
-        """.format(len(st.session_state.ebooks)), unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("""
+        total_capitulos = sum([e['capitulos'] for e in st.session_state.ebooks]) if st.session_state.ebooks else 0
+        st.markdown(f"""
             <div class="metric-card">
-                <h3 style="margin: 0;">{}</h3>
-                <p style="margin: 0; font-size: 12px;">Capítulos Gerados</p>
+                <h3 style="margin: 0;">{total_capitulos}</h3>
+                <p style="margin: 0; font-size: 12px;">Capitulos Gerados</p>
             </div>
-        """.format(sum([e['capítulos'] for e in st.session_state.ebooks])), unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
     
     with col3:
         st.markdown("""
             <div class="metric-card">
                 <h3 style="margin: 0;">12</h3>
-                <p style="margin: 0; font-size: 12px;">Temas Disponíveis</p>
+                <p style="margin: 0; font-size: 12px;">Temas Disponiveis</p>
             </div>
         """, unsafe_allow_html=True)
     
     with col4:
         st.markdown("""
             <div class="metric-card">
-                <h3 style="margin: 0;">∞</h3>
-                <p style="margin: 0; font-size: 12px;">Uso GRÁTIS</p>
+                <h3 style="margin: 0;">Infinito</h3>
+                <p style="margin: 0; font-size: 12px;">Uso GRATIS</p>
             </div>
         """, unsafe_allow_html=True)
     
     st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
     
-    st.markdown("### 💡 Dicas para Monetizar")
+    st.markdown("### Dicas para Monetizar")
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
-        **1️⃣ Crie em Canva**
-        - Faça design bonito
+        **1. Crie em Canva**
+        - Faca design bonito
         - Capa profissional
         
-        **2️⃣ Publique em:**
+        **2. Publique em:**
         - Gumroad (20% taxa)
         - Hotmart (50% taxa)
-        - Seu próprio site
+        - Seu proprio site
         """)
     
     with col2:
         st.markdown("""
-        **3️⃣ Preços Recomendados**
-        - Básico: R$ 27
+        **3. Precos Recomendados**
+        - Basico: R$ 27
         - Standard: R$ 67
         - Premium: R$ 127
         
-        **4️⃣ Anuncie em:**
+        **4. Anuncie em:**
         - Google Ads
         - Facebook Ads
         - Email marketing
@@ -408,10 +409,10 @@ st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
 st.markdown("""
     <div style="text-align: center; padding: 24px; color: #94a3b8;">
         <p style="margin: 0; font-size: 14px;">
-            <strong>Luciana Britto | L&B Marketing — Estratégias de Valor</strong>
+            <strong>Luciana Britto | L&B Marketing - Estrategias de Valor</strong>
         </p>
         <p style="margin: 8px 0 0 0; font-size: 12px; opacity: 0.7;">
-            © 2026 • Ferramenta de IA para Empreendoras • Usando Google Gemini
+            Copyright 2026 - Ferramenta de IA para Empreendoras - Usando Google Gemini
         </p>
     </div>
 """, unsafe_allow_html=True)
