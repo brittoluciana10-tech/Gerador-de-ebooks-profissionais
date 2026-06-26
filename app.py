@@ -13,7 +13,7 @@ from datetime import datetime
 from io import BytesIO
 
 st.set_page_config(
-    page_title="Ebook Creator Pro",
+    page_title="Ebook Creator Pro Premium",
     page_icon="📚",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -47,19 +47,6 @@ st.markdown("""
         box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6) !important;
     }
     
-    .stSelectbox, .stTextInput, .stSlider { 
-        border-radius: 8px !important;
-    }
-    
-    .card {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        border: 1px solid rgba(59, 130, 246, 0.2);
-        border-radius: 12px;
-        padding: 24px;
-        margin: 12px 0;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
-    
     .header-card {
         background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
         border-radius: 12px;
@@ -83,6 +70,15 @@ st.markdown("""
         background: linear-gradient(90deg, transparent 0%, #3b82f6 50%, transparent 100%);
         height: 2px;
         margin: 32px 0;
+    }
+    
+    .section-title {
+        color: #3b82f6;
+        font-size: 18px;
+        font-weight: 700;
+        margin: 24px 0 12px 0;
+        border-left: 4px solid #3b82f6;
+        padding-left: 12px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -109,11 +105,38 @@ TEMAS = {
     "Carreira": "Carreira, emprego, desenvolvimento profissional",
 }
 
+# IDIOMAS
+IDIOMAS = {
+    "Português": "Português",
+    "Inglês": "English",
+    "Espanhol": "Español",
+    "Francês": "Français",
+    "Italiano": "Italiano",
+}
+
+# ESTILOS DE ARTE
+ESTILOS_ARTE = {
+    "Foto": "Fotografia realista, alta qualidade, profissional",
+    "Ilustração": "Ilustração, desenho artístico, colorido",
+    "Abstrato": "Arte abstrata, formas geométricas, moderna",
+    "Digital": "Arte digital, cyberpunk, futurista",
+    "Aquarela": "Estilo aquarela, suave, artístico",
+    "Minimalista": "Design minimalista, limpo, moderno",
+}
+
+# MODELOS DE IMAGEM
+MODELOS_IMAGEM = {
+    "DALL-E 3": "DALL-E 3 (Openai) - Ultra realista",
+    "Gemini Vision": "Google Gemini - Balanceado",
+    "Midjourney": "Midjourney - Artístico premium",
+    "Stable Diffusion": "Stable Diffusion - Rápido",
+}
+
 # HEADER
 st.markdown("""
     <div class="header-card">
-        <h1 style="margin: 0; font-size: 48px;">📚 Ebook Creator Pro</h1>
-        <p style="margin: 12px 0 0 0; font-size: 18px; opacity: 0.9;">Crie ebooks profissionais em segundos</p>
+        <h1 style="margin: 0; font-size: 48px;">📚 Ebook Creator Pro Premium</h1>
+        <p style="margin: 12px 0 0 0; font-size: 18px; opacity: 0.9;">Crie ebooks profissionais com CONTROLE TOTAL</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -124,10 +147,12 @@ tab1, tab2, tab3 = st.tabs(["Criar Ebook", "Meus Ebooks", "Dashboard"])
 with tab1:
     st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
     
+    # SECAO 1: BASICO
+    st.markdown("<div class='section-title'>1. Configuracao Basica</div>", unsafe_allow_html=True)
+    
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        st.markdown("### Configurar seu Ebook")
         tema_nome = st.selectbox(
             "Escolha o tema",
             list(TEMAS.keys()),
@@ -136,29 +161,99 @@ with tab1:
         tema_desc = TEMAS[tema_nome]
     
     with col2:
-        st.markdown("### Público")
         audience = st.text_input(
-            "Público-alvo",
-            "Mães portuguesas",
+            "Publico-alvo",
+            "Maes portuguesas",
             label_visibility="collapsed"
         )
     
     st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
     
+    # SECAO 2: ESTRUTURA
+    st.markdown("<div class='section-title'>2. Estrutura do Ebook</div>", unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        num_chapters = st.slider("Capitulos", 2, 5, 3, label_visibility="collapsed")
+        num_chapters = st.slider(
+            "Numero de Capitulos",
+            min_value=2,
+            max_value=10,
+            value=3,
+            step=1
+        )
     
     with col2:
-        st.markdown("**Download**")
-        formato_txt = st.checkbox("TXT", value=True)
-        formato_word = st.checkbox("Word", value=True)
+        palavras_capitulo = st.select_slider(
+            "Palavras por Capitulo",
+            options=[200, 400, 600, 800, 1000, 1200],
+            value=600
+        )
     
     with col3:
-        st.markdown("**Opcoes**")
+        estilo = st.selectbox(
+            "Estilo de Escrita",
+            ["Profissional", "Descontraido", "Cientifico", "Inspirador"],
+            label_visibility="collapsed"
+        )
+    
+    st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
+    
+    # SECAO 3: IDIOMA E LOCALIZACAO
+    st.markdown("<div class='section-title'>3. Idioma e Localizacao</div>", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        idioma = st.selectbox(
+            "Idioma do Ebook",
+            list(IDIOMAS.keys()),
+            label_visibility="collapsed"
+        )
+    
+    with col2:
+        regiao = st.text_input(
+            "Regiao/Pais (ex: Portugal, Brasil)",
+            "Portugal",
+            label_visibility="collapsed"
+        )
+    
+    st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
+    
+    # SECAO 4: IMAGENS E ARTE
+    st.markdown("<div class='section-title'>4. Configuracao de Imagens</div>", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        estilo_arte = st.selectbox(
+            "Estilo de Arte",
+            list(ESTILOS_ARTE.keys()),
+            label_visibility="collapsed"
+        )
+    
+    with col2:
+        modelo_imagem = st.selectbox(
+            "Modelo de IA para Imagens",
+            list(MODELOS_IMAGEM.keys()),
+            label_visibility="collapsed"
+        )
+    
+    st.info(f"Estilo: {ESTILOS_ARTE[estilo_arte]}\nModelo: {MODELOS_IMAGEM[modelo_imagem]}")
+    
+    st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
+    
+    # SECAO 5: DOWNLOADS
+    st.markdown("<div class='section-title'>5. Formatos de Download</div>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        formato_txt = st.checkbox("TXT", value=True)
+    with col2:
+        formato_word = st.checkbox("Word", value=True)
+    with col3:
         formato_pdf = st.checkbox("PDF", value=True)
-        estilo = st.selectbox("Estilo", ["Profissional", "Descontraido", "Cientifico"], label_visibility="collapsed")
     
     st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
     
@@ -181,21 +276,28 @@ with tab1:
                     status_text.text("Conectando a IA...")
                     progress_bar.progress(25)
                     
-                    prompt = f"""Crie um ebook PROFISSIONAL sobre '{tema_desc}' para '{audience}'.
+                    prompt = f"""Crie um ebook PROFISSIONAL em {idioma} sobre '{tema_desc}' para '{audience}' em {regiao}.
+
+PARAMETROS EXATOS:
+- Numero de capitulos: {num_chapters}
+- Palavras por capitulo: {palavras_capitulo}
+- Estilo: {estilo}
+- Estilo de arte: {ESTILOS_ARTE[estilo_arte]}
 
 ESTRUTURA OBRIGATORIA:
 - TITULO: (titulo atrativo e profissional)
-- INTRODUCAO: (2-3 paragrafos inspiradores)
+- INTRODUCAO: (2-3 paragrafos inspiradores em {idioma})
 - {num_chapters} CAPITULOS:
   * Titulo do capitulo
-  * Conteudo detalhado (400+ palavras)
+  * Conteudo com aproximadamente {palavras_capitulo} palavras
+  * Adaptado para {regiao}
   * 3 dicas praticas
 - CONCLUSAO: (mensagem final inspiradora)
-- BONUS: (5 dicas extras)
+- BONUS: (5 dicas extras para {audience})
 
-ESTILO: {estilo}
-QUALIDADE: Profissional, detalhado e altamente pratico
-FOCO: Resolver problemas reais de '{audience}'"""
+Escreva COMPLETAMENTE em {idioma}.
+Use linguagem apropriada para {regiao}.
+Seja profissional, detalhado e altamente pratico."""
                     
                     response = model.generate_content(prompt)
                     content = response.text
@@ -208,9 +310,13 @@ FOCO: Resolver problemas reais de '{audience}'"""
                     ebook_data = {
                         "id": len(st.session_state.ebooks) + 1,
                         "tema": tema_nome,
+                        "idioma": idioma,
                         "data": datetime.now().strftime("%d/%m/%Y %H:%M"),
                         "publico": audience,
                         "capitulos": num_chapters,
+                        "palavras": palavras_capitulo,
+                        "estilo_arte": estilo_arte,
+                        "modelo": modelo_imagem,
                         "conteudo": content
                     }
                     st.session_state.ebooks.append(ebook_data)
@@ -224,7 +330,7 @@ FOCO: Resolver problemas reais de '{audience}'"""
                 
                 # PREVIEW
                 with st.expander("Ver Preview", expanded=True):
-                    st.write(content[:1000] + "...")
+                    st.write(content[:1200] + "...")
                 
                 # DOWNLOADS
                 st.markdown("### Download seu Ebook")
@@ -234,11 +340,11 @@ FOCO: Resolver problemas reais de '{audience}'"""
                 # TXT
                 if formato_txt:
                     with col_d1:
-                        txt = f"{tema_nome}\n\nPor Luciana Britto | L&B Marketing\n{datetime.now().strftime('%d/%m/%Y')}\n\n{content}\n\nCopyright 2026 Luciana Britto | L&B Marketing"
+                        txt = f"{tema_nome}\n\nPor Luciana Britto | L&B Marketing\nIdioma: {idioma}\nRegiao: {regiao}\nCapitulos: {num_chapters}\n{datetime.now().strftime('%d/%m/%Y')}\n\n{content}\n\nCopyright 2026 Luciana Britto | L&B Marketing"
                         st.download_button(
                             "Download TXT",
                             txt,
-                            f"{tema_nome}.txt",
+                            f"{tema_nome}_{idioma}.txt",
                             "text/plain",
                             use_container_width=True
                         )
@@ -249,9 +355,14 @@ FOCO: Resolver problemas reais de '{audience}'"""
                         doc = Document()
                         title = doc.add_heading(tema_nome, 0)
                         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                        subtitle = doc.add_paragraph("Por Luciana Britto | L&B Marketing")
-                        subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                        doc.add_paragraph(f"Gerado em {datetime.now().strftime('%d/%m/%Y')}")
+                        
+                        info = doc.add_paragraph()
+                        info.add_run("Por Luciana Britto | L&B Marketing\n").bold = True
+                        info.add_run(f"Idioma: {idioma} | Regiao: {regiao}\n")
+                        info.add_run(f"Capitulos: {num_chapters} | Estilo: {estilo_arte}\n")
+                        info.add_run(f"Gerado em {datetime.now().strftime('%d/%m/%Y')}")
+                        info.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        
                         doc.add_paragraph()
                         doc.add_paragraph(content)
                         
@@ -262,7 +373,7 @@ FOCO: Resolver problemas reais de '{audience}'"""
                         st.download_button(
                             "Download Word",
                             doc_bytes.getvalue(),
-                            f"{tema_nome}.docx",
+                            f"{tema_nome}_{idioma}.docx",
                             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                             use_container_width=True
                         )
@@ -296,7 +407,8 @@ FOCO: Resolver problemas reais de '{audience}'"""
                         
                         story.append(Paragraph(tema_nome, title_style))
                         story.append(Spacer(1, 0.2*inch))
-                        story.append(Paragraph("Por Luciana Britto | L&B Marketing", styles['Normal']))
+                        story.append(Paragraph(f"Por Luciana Britto | L&B Marketing", styles['Normal']))
+                        story.append(Paragraph(f"Idioma: {idioma} | Regiao: {regiao}", styles['Normal']))
                         story.append(Paragraph(f"{datetime.now().strftime('%d de %B de %Y')}", styles['Normal']))
                         story.append(PageBreak())
                         story.append(Paragraph(content, body_style))
@@ -307,7 +419,7 @@ FOCO: Resolver problemas reais de '{audience}'"""
                         st.download_button(
                             "Download PDF",
                             buffer.getvalue(),
-                            f"{tema_nome}.pdf",
+                            f"{tema_nome}_{idioma}.pdf",
                             "application/pdf",
                             use_container_width=True
                         )
@@ -325,10 +437,13 @@ with tab2:
         st.markdown(f"### Total: {len(st.session_state.ebooks)} Ebooks")
         
         for ebook in reversed(st.session_state.ebooks):
-            titulo_expander = f"EBOOK: {ebook['tema']} - {ebook['publico']} - {ebook['data']}"
+            titulo_expander = f"EBOOK: {ebook['tema']} ({ebook['idioma']}) - {ebook['capitulos']} cap - {ebook['data']}"
             with st.expander(titulo_expander, expanded=False):
                 col1, col2 = st.columns([3, 1])
                 with col1:
+                    st.write(f"**Publico:** {ebook['publico']}")
+                    st.write(f"**Estilo:** {ebook['estilo_arte']} | **Modelo:** {ebook['modelo']}")
+                    st.write(f"**Palavras por capitulo:** {ebook['palavras']}")
                     st.write(ebook['conteudo'][:500] + "...")
                 with col2:
                     if st.button(f"Ver Completo", key=f"view_{ebook['id']}"):
@@ -360,8 +475,8 @@ with tab3:
     with col3:
         st.markdown("""
             <div class="metric-card">
-                <h3 style="margin: 0;">12</h3>
-                <p style="margin: 0; font-size: 12px;">Temas Disponiveis</p>
+                <h3 style="margin: 0;">5 Idiomas</h3>
+                <p style="margin: 0; font-size: 12px;">Disponiveis</p>
             </div>
         """, unsafe_allow_html=True)
     
@@ -375,33 +490,40 @@ with tab3:
     
     st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
     
-    st.markdown("### Dicas para Monetizar")
+    st.markdown("### Opcoes Avancadas Disponiveis")
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
-        **1. Crie em Canva**
-        - Faca design bonito
-        - Capa profissional
+        **Estrutura Flexivel**
+        - 2 a 10 capitulos
+        - 200 a 1200 palavras por capitulo
+        - Ajuste fino do tamanho
         
-        **2. Publique em:**
-        - Gumroad (20% taxa)
-        - Hotmart (50% taxa)
-        - Seu proprio site
+        **Multiplos Idiomas**
+        - Portugues
+        - Ingles
+        - Espanhol
+        - Frances
+        - Italiano
         """)
     
     with col2:
         st.markdown("""
-        **3. Precos Recomendados**
-        - Basico: R$ 27
-        - Standard: R$ 67
-        - Premium: R$ 127
+        **Estilos de Arte**
+        - Foto (realista)
+        - Ilustracao (artistico)
+        - Abstrato (moderno)
+        - Digital (futurista)
+        - Aquarela (suave)
+        - Minimalista (limpo)
         
-        **4. Anuncie em:**
-        - Google Ads
-        - Facebook Ads
-        - Email marketing
+        **Modelos de IA**
+        - DALL-E 3 (ultra real)
+        - Gemini Vision (balanceado)
+        - Midjourney (premium)
+        - Stable Diffusion (rapido)
         """)
 
 # FOOTER
@@ -412,7 +534,7 @@ st.markdown("""
             <strong>Luciana Britto | L&B Marketing - Estrategias de Valor</strong>
         </p>
         <p style="margin: 8px 0 0 0; font-size: 12px; opacity: 0.7;">
-            Copyright 2026 - Ferramenta de IA para Empreendoras - Usando Google Gemini
+            Copyright 2026 - Ferramenta PRO Premium de IA para Empreendoras
         </p>
     </div>
 """, unsafe_allow_html=True)
