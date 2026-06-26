@@ -1,33 +1,32 @@
 import streamlit as st
-from openai import OpenAI
+import google.generativeai as genai
 
 st.set_page_config(page_title="Gerador de Ebooks", page_icon="📚")
 
 st.title("📚 Gerador de Ebooks")
+st.markdown("Crie ebooks com IA Google (GRÁTIS!)")
 
-topic = st.text_input("Tema do Ebook")
-audience = st.text_input("Público-alvo")
+topic = st.text_input("📖 Tema do Ebook", "Maternidade real")
+audience = st.text_input("👥 Público-alvo", "mães")
 
-if st.button("🚀 Gerar Ebook"):
-    if not topic or not audience:
-        st.warning("Preencha tema e público-alvo!")
-    else:
-        try:
-            api_key = st.secrets["OPENAI_API_KEY"]
-            client = OpenAI(api_key=api_key)
+if st.button("🚀 Gerar Ebook", use_container_width=True):
+    try:
+        api_key = st.secrets["GEMINI_API_KEY"]
+        genai.configure(api_key=api_key)
+        
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        
+        with st.spinner("⏳ Gerando com Google Gemini..."):
+            response = model.generate_content(
+                f"Crie um ebook sobre '{topic}' para '{audience}'. "
+                f"Estrutura: 3 capítulos, cada um com título e 200 palavras."
+            )
             
-            with st.spinner("Gerando..."):
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    max_tokens=1000,
-                    messages=[{
-                        "role": "user",
-                        "content": f"Crie um ebook sobre '{topic}' para '{audience}'. 3 capítulos com 150 palavras cada."
-                    }]
-                )
-                
-                st.success("✅ Pronto!")
-                st.write(response.choices[0].message.content)
-                
-        except Exception as e:
-            st.error(f"Erro: {str(e)}")
+            st.success("✅ Ebook gerado com sucesso!")
+            st.write(response.text)
+            
+    except Exception as e:
+        st.error(f"❌ Erro: {str(e)}")
+
+st.markdown("---")
+st.markdown("**Luciana Britto | L&B Marketing — Estratégias de Valor**")
