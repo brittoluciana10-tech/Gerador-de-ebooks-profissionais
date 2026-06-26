@@ -3,249 +3,249 @@ import google.generativeai as genai
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
+from reportlab.lib import colors
 from datetime import datetime
 from io import BytesIO
-import base64
+import json
 
-st.set_page_config(page_title="Gerador de Ebooks Premium", page_icon="📚", layout="wide")
+st.set_page_config(page_title="Gerador de Ebooks Premium 2.0", page_icon="📚", layout="wide")
 
-st.title("📚 Gerador de Ebooks Premium")
-st.markdown("Crie ebooks profissionais + PDF + Word + Pagina de Venda")
+# CSS
+st.markdown("""
+    <style>
+    .main { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .stButton>button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    </style>
+""", unsafe_allow_html=True)
 
-# TEMAS EXPANDIDOS
+# INICIALIZAR SESSION STATE
+if "user" not in st.session_state:
+    st.session_state.user = None
+if "ebooks" not in st.session_state:
+    st.session_state.ebooks = []
+if "page" not in st.session_state:
+    st.session_state.page = "home"
+
+# TEMAS
 TEMAS = {
-    "Maternidade Real": "Maternidade real, maes, experiencias honestas, emocoes",
-    "Sono do Bebe": "Sono infantil, tecnicas de dormir, rotina, sono profundo",
-    "Pos-parto": "Recuperacao pos-parto, saude, bem-estar, corpo",
-    "Parenting": "Educacao infantil, desenvolvimento, parentalidade, criancas",
-    "Renda Variavel": "Renda extra, freelance, negocios digitais, ganho",
-    "Bem-estar": "Mindfulness, meditacao, saude mental, calma",
-    "Autonomo": "Ser autonomo, gestao, financeiro, independencia",
+    "Maternidade Real": "Maternidade real, maes, experiencias honestas",
+    "Sono do Bebe": "Sono infantil, tecnicas de dormir, rotina",
+    "Pos-parto": "Recuperacao pos-parto, saude, bem-estar",
+    "Parenting": "Educacao infantil, desenvolvimento, parentalidade",
+    "Renda Variavel": "Renda extra, freelance, negocios digitais",
+    "Bem-estar": "Mindfulness, meditacao, saude mental",
+    "Autonomo": "Ser autonomo, gestao, financeiro",
     "Peso Saudavel": "Perda de peso, fitness, saude, nutricao",
     "Criatividade": "Criatividade, inovacao, arte, inspiracao",
-    "Financas": "Educacao financeira, investimentos, economia, dinheiro",
-    "Relacionamentos": "Relacionamentos, amor, comunicacao, casal",
-    "Carreira": "Carreira, emprego, desenvolvimento, profissao",
+    "Financas": "Educacao financeira, investimentos, economia",
+    "Relacionamentos": "Relacionamentos, amor, comunicacao",
+    "Carreira": "Carreira, emprego, desenvolvimento profissional",
 }
 
-col1, col2 = st.columns(2)
+# FUNCAO: Gerar PDF Profissional
+def gerar_pdf_profissional(tema_nome, content):
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    story = []
+    styles = getSampleStyleSheet()
+    
+    # Estilos customizados
+    titulo_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=28,
+        textColor=colors.HexColor('#667eea'),
+        spaceAfter=12,
+        alignment=TA_CENTER,
+        fontName='Helvetica-Bold'
+    )
+    
+    body_style = ParagraphStyle(
+        'CustomBody',
+        parent=styles['BodyText'],
+        fontSize=11,
+        alignment=TA_JUSTIFY,
+        spaceAfter=12,
+        leading=16
+    )
+    
+    # Titulo
+    story.append(Paragraph(tema_nome, titulo_style))
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Autor
+    author_style = ParagraphStyle('Author', parent=styles['Normal'], alignment=TA_CENTER)
+    story.append(Paragraph("<i>Por Luciana Britto | L&B Marketing</i>", author_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    # Data
+    story.append(Paragraph(f"<i>{datetime.now().strftime('%d de %B de %Y')}</i>", author_style))
+    story.append(PageBreak())
+    
+    # Conteudo
+    story.append(Paragraph(content, body_style))
+    
+    # Footer
+    story.append(Spacer(1, 0.5*inch))
+    footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, alignment=TA_CENTER)
+    story.append(Paragraph("© 2026 Luciana Britto | L&B Marketing - Estrategias de Valor", footer_style))
+    
+    doc.build(story)
+    buffer.seek(0)
+    return buffer.getvalue()
 
-with col1:
-    tema_nome = st.selectbox("Escolha o Tema", list(TEMAS.keys()))
-    tema_desc = TEMAS[tema_nome]
+# PAGINA: HOME
+if st.session_state.page == "home":
+    st.title("📚 Gerador de Ebooks Premium 2.0")
+    st.markdown("Crie ebooks profissionais + PDF + Word + Historico")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("🆕 Novo Ebook", use_container_width=True):
+            st.session_state.page = "create"
+            st.rerun()
+    
+    with col2:
+        if st.button("📚 Meus Ebooks", use_container_width=True):
+            st.session_state.page = "history"
+            st.rerun()
+    
+    with col3:
+        if st.button("⚙️ Configuracoes", use_container_width=True):
+            st.session_state.page = "settings"
+            st.rerun()
+    
+    st.markdown("---")
+    st.info(f"Total de ebooks gerados: **{len(st.session_state.ebooks)}**")
 
-with col2:
-    audience = st.text_input("Publico-alvo", "maes")
-
-# Opcoes
-col1, col2 = st.columns(2)
-with col1:
-    num_chapters = st.slider("Capitulos", 2, 5, 3)
-with col2:
-    formato = st.multiselect("Download", ["TXT", "Word", "PDF"], default=["TXT", "Word"])
-
-if st.button("Gerar Ebook Premium", use_container_width=True):
-    try:
-        api_key = st.secrets["GEMINI_API_KEY"]
-        genai.configure(api_key=api_key)
-        
-        models = [m.name for m in genai.list_models()]
-        model_name = [m for m in models if "gemini" in m.lower()][0]
-        model = genai.GenerativeModel(model_name)
-        
-        with st.spinner("Gerando conteudo com IA..."):
-            prompt = f"""Crie um ebook profissional sobre '{tema_desc}' para '{audience}'.
-
-Estrutura obrigatoria:
-- TITULO: (titulo atrativo e profissional)
-- INTRODUCAO: (2-3 paragrafos inspiradores)
-- {num_chapters} CAPITULOS com:
-  * CAPITULO N: Titulo
-  * Conteudo detalhado (300+ palavras)
-  * Dicas praticas
-- CONCLUSAO: (mensagem final inspiradora)
-- BONUS: (3 dicas extras)
-
-Seja profissional, detalhado e pratico!"""
-
-            response = model.generate_content(prompt)
-            content = response.text
+# PAGINA: CREATE
+elif st.session_state.page == "create":
+    st.title("🆕 Novo Ebook")
+    
+    if st.button("← Voltar"):
+        st.session_state.page = "home"
+        st.rerun()
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        tema_nome = st.selectbox("Tema", list(TEMAS.keys()))
+        tema_desc = TEMAS[tema_nome]
+    
+    with col2:
+        audience = st.text_input("Publico-alvo", "maes")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        num_chapters = st.slider("Capitulos", 2, 5, 3)
+    with col2:
+        formato = st.multiselect("Download", ["TXT", "Word", "PDF"], default=["TXT", "Word", "PDF"])
+    
+    if st.button("🚀 Gerar Ebook", use_container_width=True):
+        try:
+            api_key = st.secrets["GEMINI_API_KEY"]
+            genai.configure(api_key=api_key)
             
-            st.success("Ebook gerado com sucesso!")
-            st.markdown("---")
-            st.write(content)
+            models = [m.name for m in genai.list_models()]
+            model_name = [m for m in models if "gemini" in m.lower()][0]
+            model = genai.GenerativeModel(model_name)
             
-            # DOWNLOAD TXT
-            if "TXT" in formato:
-                txt_content = f"""{tema_nome}
+            with st.spinner("Gerando conteudo..."):
+                prompt = f"""Crie um ebook sobre '{tema_desc}' para '{audience}'.
 
-Por Luciana Britto | L&B Marketing
-Gerado em {datetime.now().strftime('%d/%m/%Y')}
+Estrutura:
+- TITULO
+- INTRODUCAO (2-3 paragrafos)
+- {num_chapters} CAPITULOS com conteudo detalhado
+- CONCLUSAO
+- BONUS (3 dicas)
 
----
-
-{content}
-
----
-
-© 2026 Luciana Britto | L&B Marketing - Estrategias de Valor
-"""
-                st.download_button(
-                    "📥 Download TXT",
-                    txt_content,
-                    f"{tema_nome}.txt",
-                    "text/plain"
-                )
-            
-            # DOWNLOAD WORD
-            if "Word" in formato:
-                doc = Document()
+Profissional e pratico!"""
                 
-                # Titulo
-                title = doc.add_heading(tema_nome, 0)
-                title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                response = model.generate_content(prompt)
+                content = response.text
                 
-                # Subtitulo
-                subtitle = doc.add_paragraph()
-                subtitle_run = subtitle.add_run(f"Por Luciana Britto | L&B Marketing")
-                subtitle_run.bold = True
-                subtitle_run.font.size = Pt(12)
-                subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                st.success("Ebook gerado!")
+                st.write(content)
                 
-                # Data
-                date_para = doc.add_paragraph(f"Gerado em {datetime.now().strftime('%d/%m/%Y')}")
-                date_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                # Adicionar ao historico
+                ebook_data = {
+                    "id": len(st.session_state.ebooks) + 1,
+                    "tema": tema_nome,
+                    "data": datetime.now().strftime("%d/%m/%Y %H:%M"),
+                    "conteudo": content
+                }
+                st.session_state.ebooks.append(ebook_data)
                 
-                doc.add_paragraph()
+                # DOWNLOADS
+                col1, col2, col3 = st.columns(3)
                 
-                # Conteudo
-                doc.add_paragraph(content)
+                # TXT
+                if "TXT" in formato:
+                    with col1:
+                        txt = f"{tema_nome}\n\nPor Luciana Britto\n{datetime.now().strftime('%d/%m/%Y')}\n\n{content}\n\n© 2026 Luciana Britto | L&B Marketing"
+                        st.download_button("📥 TXT", txt, f"{tema_nome}.txt", "text/plain")
                 
-                # Footer
-                footer_para = doc.add_paragraph()
-                footer_run = footer_para.add_run("© 2026 Luciana Britto | L&B Marketing - Estrategias de Valor")
-                footer_run.font.size = Pt(8)
-                footer_run.italic = True
-                footer_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                # WORD
+                if "Word" in formato:
+                    with col2:
+                        doc = Document()
+                        title = doc.add_heading(tema_nome, 0)
+                        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        doc.add_paragraph(f"Por Luciana Britto | L&B Marketing\n{datetime.now().strftime('%d/%m/%Y')}", style='Normal').alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        doc.add_paragraph(content)
+                        
+                        doc_bytes = BytesIO()
+                        doc.save(doc_bytes)
+                        doc_bytes.seek(0)
+                        
+                        st.download_button("📄 Word", doc_bytes.getvalue(), f"{tema_nome}.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
                 
-                # Salvar em bytes
-                doc_bytes = BytesIO()
-                doc.save(doc_bytes)
-                doc_bytes.seek(0)
+                # PDF
+                if "PDF" in formato:
+                    with col3:
+                        pdf_data = gerar_pdf_profissional(tema_nome, content)
+                        st.download_button("🎨 PDF", pdf_data, f"{tema_nome}.pdf", "application/pdf")
                 
-                st.download_button(
-                    "📄 Download Word",
-                    doc_bytes.getvalue(),
-                    f"{tema_nome}.docx",
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                )
-            
-            # PAGINA DE VENDA
-            st.markdown("---")
-            st.subheader("🛍️ Crie Pagina de Venda")
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.info(f"""
-**Sua pagina deve incluir:**
+        except Exception as e:
+            st.error(f"Erro: {str(e)}")
 
-1. **Titulo Atrativo**
-   {tema_nome}
+# PAGINA: HISTORY
+elif st.session_state.page == "history":
+    st.title("📚 Meus Ebooks")
+    
+    if st.button("← Voltar"):
+        st.session_state.page = "home"
+        st.rerun()
+    
+    if len(st.session_state.ebooks) == 0:
+        st.info("Nenhum ebook gerado ainda. Comece agora!")
+    else:
+        for ebook in reversed(st.session_state.ebooks):
+            with st.expander(f"📖 {ebook['tema']} - {ebook['data']}"):
+                st.write(ebook['conteudo'][:500] + "...")
+                if st.button(f"Ver completo - {ebook['id']}"):
+                    st.write(ebook['conteudo'])
 
-2. **Problema do Cliente**
-   Que dor sua audiencia ({audience}) tem?
-
-3. **Solucao (Seu Ebook)**
-   Por que seu ebook resolve?
-
-4. **Beneficios**
-   - Benefit 1
-   - Benefit 2
-   - Benefit 3
-
-5. **Prova Social**
-   Depoimentos ou dados
-
-6. **CTA (Call to Action)**
-   "Compre agora por R$29"
-                """)
-            
-            with col2:
-                st.warning(f"""
-**Ferramentas Recomendadas:**
-
-1. **Canva** (design gratis)
-   - Templates de landing page
-   - Cores profissionais
-   - Fonts bonitos
-
-2. **Plataformas de Venda:**
-   - Gumroad (mais facil)
-   - Hotmart (mais profissional)
-   - Sua propria loja
-
-3. **Email Marketing:**
-   - Brevo (gratis)
-   - Mailchimp
-   - Converkit
-
-4. **Anuncios:**
-   - Google Ads
-   - Facebook Ads
-   - TikTok Ads
-                """)
-            
-            # Sugestoes de preco
-            st.markdown("---")
-            st.subheader("💰 Sugestoes de Preco")
-            
-            pricing_col1, pricing_col2, pricing_col3 = st.columns(3)
-            
-            with pricing_col1:
-                st.success("""
-**BASICO**
-R$ 17-27
-
-- 1 Ebook
-- Email de suporte
-- Atualizacoes
-                """)
-            
-            with pricing_col2:
-                st.info("""
-**STANDARD**
-R$ 47-77
-
-- Ebook + PDF premium
-- Email ilimitado
-- Grupo no Discord
-- Atualizacoes vitalicia
-                """)
-            
-            with pricing_col3:
-                st.warning("""
-**PREMIUM**
-R$ 97-197
-
-- Ebook + Templates
-- 3 chamadas 1:1
-- Grupo privado
-- Suporte prioritario
-                """)
-            
-    except Exception as e:
-        st.error(f"Erro: {str(e)}")
+# PAGINA: SETTINGS
+elif st.session_state.page == "settings":
+    st.title("⚙️ Configuracoes")
+    
+    if st.button("← Voltar"):
+        st.session_state.page = "home"
+        st.rerun()
+    
+    st.info("""
+**Sobre sua conta:**
+- Total de ebooks: {}
+- Ultimo gerado: {}
+    """.format(len(st.session_state.ebooks), st.session_state.ebooks[-1]['data'] if st.session_state.ebooks else "Nenhum"))
 
 st.markdown("---")
-st.markdown("""
-**Luciana Britto | L&B Marketing — Estrategias de Valor**
-
-🚀 Seus proximos passos:
-1. Gere o ebook
-2. Baixe em Word/TXT
-3. Crie pagina de venda em Canva
-4. Publique em Gumroad/Hotmart
-5. Anuncie no Google Ads
-6. Ganhe passivamente! 💰
-""")
+st.markdown("**Luciana Britto | L&B Marketing — Estrategias de Valor**")
