@@ -14,7 +14,11 @@ if st.button("🚀 Gerar Ebook", use_container_width=True):
         api_key = st.secrets["GEMINI_API_KEY"]
         genai.configure(api_key=api_key)
         
-        model = genai.GenerativeModel("gemini-1.5-pro")
+        # Descobre qual modelo disponível
+        models = [m.name for m in genai.list_models()]
+        model_name = [m for m in models if "gemini" in m.lower()][0]
+        
+        model = genai.GenerativeModel(model_name)
         
         with st.spinner("⏳ Gerando com Google Gemini..."):
             response = model.generate_content(
