@@ -77,18 +77,35 @@ Leve, profissional e prático."""
             st.write(content)
             
             # Gerar PDF
-            with st.spinner("📄 Gerando PDF..."):
-                pdf = FPDF()
-                pdf.add_page()
-                pdf.set_font("Arial", "B", 20)
-                pdf.cell(0, 10, tema_nome, ln=True, align="C")
-                
-                pdf.set_font("Arial", "I", 10)
-                pdf.cell(0, 10, f"Por Luciana Britto | L&B Marketing", ln=True, align="C")
-                pdf.cell(0, 10, f"Gerado em {datetime.now().strftime('%d/%m/%Y')}", ln=True, align="C")
-                
-                pdf.ln(10)
-                pdf.set_font("Arial", "", 11)
+with st.spinner("📄 Gerando PDF..."):
+    pdf = FPDF()
+    pdf.add_font('DejaVu', '', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')
+    pdf.set_font("DejaVu", "", 11)
+    pdf.add_page()
+    pdf.set_font("DejaVu", "B", 20)
+    pdf.cell(0, 10, tema_nome.replace("🤰", "").replace("👶", "").replace("💪", "").replace("📚", "").replace("💰", "").replace("🧘", "").replace("💼", "").strip(), ln=True, align="C")
+    
+    pdf.set_font("DejaVu", "I", 10)
+    pdf.cell(0, 10, "Por Luciana Britto | L&B Marketing", ln=True, align="C")
+    pdf.cell(0, 10, f"Gerado em {datetime.now().strftime('%d/%m/%Y')}", ln=True, align="C")
+    
+    pdf.ln(10)
+    pdf.set_font("DejaVu", "", 11)
+    
+    # Quebrar texto em linhas
+    for line in content.split('\n'):
+        if line.strip():
+            try:
+                pdf.multi_cell(0, 5, line[:500])  # Limita caracteres
+            except:
+                pass
+    
+    pdf.ln(5)
+    pdf.set_font("DejaVu", "I", 8)
+    pdf.cell(0, 5, "© 2026 Luciana Britto | L&B Marketing - Estrategias de Valor", ln=True)
+    
+    # Salvar em bytes
+    pdf_bytes = pdf.output()
                 
                 # Quebrar texto em linhas
                 for line in content.split('\n'):
