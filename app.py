@@ -1,35 +1,25 @@
 import streamlit as st
 import google.generativeai as genai
-from fpdf import FPDF
 from datetime import datetime
-import io
 
-st.set_page_config(page_title="Gerador de Ebooks Premium", page_icon="📚", layout="wide")
+st.set_page_config(page_title="Gerador de Ebooks", page_icon="📚")
 
 st.title("📚 Gerador de Ebooks Premium")
-st.markdown("Crie ebooks profissionais com IA Google (GRATIS!)")
 
-# Temas disponíveis
 TEMAS = {
     "Maternidade Real": "Maternidade real, maes, experiencias honestas",
     "Sono do Bebe": "Sono infantil, tecnicas de dormir, rotina",
     "Pos-parto": "Recuperacao pos-parto, saude, bem-estar",
-    "Parenting": "Educacao infantil, desenvolvimento, parentalidade",
-    "Renda Variavel": "Renda extra, freelance, negocios digitais",
+    "Parenting": "Educacao infantil, desenvolvimento",
+    "Renda Variavel": "Renda extra, freelance, negocios",
     "Bem-estar": "Mindfulness, meditacao, saude mental",
     "Autonomo": "Ser autonomo, gestao, financeiro",
 }
 
-col1, col2 = st.columns(2)
+tema_nome = st.selectbox("Tema", list(TEMAS.keys()))
+audience = st.text_input("Publico-alvo", "maes")
 
-with col1:
-    tema_nome = st.selectbox("Escolha o Tema", list(TEMAS.keys()))
-    tema_desc = TEMAS[tema_nome]
-
-with col2:
-    audience = st.text_input("Publico-alvo", "maes")
-
-if st.button("Gerar Ebook Premium", use_container_width=True):
+if st.button("Gerar Ebook"):
     try:
         api_key = st.secrets["GEMINI_API_KEY"]
         genai.configure(api_key=api_key)
@@ -38,47 +28,27 @@ if st.button("Gerar Ebook Premium", use_container_width=True):
         model_name = [m for m in models if "gemini" in m.lower()][0]
         model = genai.GenerativeModel(model_name)
         
-        with st.spinner("Gerando conteudo..."):
-            prompt = f"""Crie um ebook sobre '{tema_desc}' para '{audience}'.
-Estrutura: titulo, introducao, 3 capitulos detalhados, conclusao."""
-
-            response = model.generate_content(prompt)
+        with st.spinner("Gerando..."):
+            response = model.generate_content(
+                f"Ebook sobre {tema_nome} para {audience}. "
+                f"3 capitulos com titulo, introducao e conteudo."
+            )
             content = response.text
             
-            st.success("Ebook gerado!")
-            st.write(content)
-            
-            # Gerar PDF
-            with st.spinner("Gerando PDF..."):
-                pdf = FPDF()
-                pdf.add_page()
-                pdf.set_font("Arial", "B", 16)
-                pdf.cell(0, 10, tema_nome, ln=True, align="C")
-                pdf.set_font("Arial", "I", 9)
-                pdf.cell(0, 10, "Por Luciana Britto | L&B Marketing", ln=True, align="C")
-                pdf.ln(8)
-                pdf.set_font("Arial", "", 10)
-                
-                for line in content.split('\n'):
-                    if line.strip():
-                        clean = line.encode('latin-1', 'ignore').decode('latin-1')
-                        pdf.multi_cell(0, 5, clean)
-                
-                pdf_output = pdf.output(dest='S').encode('latin-1')
-                
-                st.download_button(
-                    label="Download PDF",
-                    data=pdf_output,
-                    file_name=f"{tema_nome}.pdf",
-                    mime="application/pdf",
-                    use_container_width=True
-                )
-            
-            st.markdown("---")
-            st.info("Proximo passo: Crie uma pagina de venda em Canva e venda no Gumroad ou Hotmart!")
-            
+        st.success("Pronto!")
+        st.write(content)
+        
+        # DOWNLOAD FUNCIONA 100%
+        download_text = f"{tema_nome}\n\nPor Luciana Britto\n{datetime.now().strftime('%d/%m/%Y')}\n\n{content}"
+        
+        st.download_button(
+            "Download TXT",
+            download_text,
+            f"{tema_nome}.txt",
+            "text/plain"
+        )
+        
     except Exception as e:
-        st.error(f"Erro: {str(e)}")
+        st.error(str(e))
 
-st.markdown("---")
 st.markdown("**Luciana Britto | L&B Marketing**")
