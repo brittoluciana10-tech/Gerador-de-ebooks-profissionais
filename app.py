@@ -3,11 +3,11 @@ import google.generativeai as genai
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
-from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT
 from reportlab.lib import colors
 from datetime import datetime
 from io import BytesIO
@@ -206,6 +206,168 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# FUNCAO: Gerar PDF Profissional
+def gerar_pdf_profissional(tema, audience, idioma, regiao, conteudo, sugestoes_imagens):
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        topMargin=0.8*inch,
+        bottomMargin=0.8*inch,
+        leftMargin=0.8*inch,
+        rightMargin=0.8*inch
+    )
+    
+    story = []
+    styles = getSampleStyleSheet()
+    
+    # ESTILOS CUSTOMIZADOS
+    titulo_capa = ParagraphStyle(
+        'TituloCapa',
+        parent=styles['Heading1'],
+        fontSize=48,
+        textColor=colors.HexColor('#6366f1'),
+        spaceAfter=20,
+        alignment=TA_CENTER,
+        fontName='Helvetica-Bold'
+    )
+    
+    subtitulo_capa = ParagraphStyle(
+        'SubtituloCapa',
+        parent=styles['Normal'],
+        fontSize=24,
+        textColor=colors.HexColor('#8b5cf6'),
+        spaceAfter=40,
+        alignment=TA_CENTER,
+        fontName='Helvetica'
+    )
+    
+    info_capa = ParagraphStyle(
+        'InfoCapa',
+        parent=styles['Normal'],
+        fontSize=12,
+        textColor=colors.HexColor('#64748b'),
+        spaceAfter=8,
+        alignment=TA_CENTER
+    )
+    
+    heading1 = ParagraphStyle(
+        'CustomHeading1',
+        parent=styles['Heading1'],
+        fontSize=28,
+        textColor=colors.HexColor('#0f172a'),
+        spaceAfter=12,
+        spaceBefore=12,
+        fontName='Helvetica-Bold'
+    )
+    
+    heading2 = ParagraphStyle(
+        'CustomHeading2',
+        parent=styles['Heading2'],
+        fontSize=16,
+        textColor=colors.HexColor('#1e293b'),
+        spaceAfter=10,
+        spaceBefore=8,
+        fontName='Helvetica-Bold'
+    )
+    
+    body = ParagraphStyle(
+        'CustomBody',
+        parent=styles['BodyText'],
+        fontSize=10,
+        alignment=TA_JUSTIFY,
+        spaceAfter=10,
+        leading=15,
+        textColor=colors.HexColor('#334155')
+    )
+    
+    # PÁGINA 1: CAPA
+    story.append(Spacer(1, 1.5*inch))
+    story.append(Paragraph("📚", titulo_capa))
+    story.append(Spacer(1, 0.2*inch))
+    story.append(Paragraph(tema, titulo_capa))
+    story.append(Spacer(1, 0.3*inch))
+    story.append(Paragraph(f"Um guia essencial para {audience}", subtitulo_capa))
+    story.append(Spacer(1, 1.5*inch))
+    story.append(Paragraph("Por Luciana Britto | L&B Marketing", info_capa))
+    story.append(Spacer(1, 0.1*inch))
+    story.append(Paragraph("Estratégias de Valor", info_capa))
+    story.append(Spacer(1, 0.2*inch))
+    story.append(Paragraph(f"Idioma: {idioma} | Região: {regiao}", info_capa))
+    story.append(Spacer(1, 0.1*inch))
+    story.append(Paragraph(f"© 2026 — Todos os direitos reservados", info_capa))
+    story.append(Spacer(1, 0.1*inch))
+    story.append(Paragraph(datetime.now().strftime("Gerado em %d de %B de %Y"), info_capa))
+    
+    # PÁGINA 2: ÍNDICE
+    story.append(PageBreak())
+    story.append(Paragraph("ÍNDICE", heading1))
+    story.append(Spacer(1, 0.2*inch))
+    
+    indice_items = [
+        "Introdução",
+        "Capítulo 1",
+        "Capítulo 2",
+        "Capítulo 3",
+        "Capítulo 4",
+        "Capítulo 5",
+        "Conclusão",
+        "Sugestões de Imagens para Melhorias",
+    ]
+    
+    for idx, item in enumerate(indice_items, 1):
+        story.append(Paragraph(f"{idx}. {item}", body))
+    
+    # PÁGINA 3+: CONTEÚDO
+    story.append(PageBreak())
+    
+    linhas = conteudo.split('\n')
+    
+    for linha in linhas:
+        linha = linha.strip()
+        if not linha:
+            story.append(Spacer(1, 0.08*inch))
+        elif linha.startswith('###'):
+            titulo = linha.replace('###', '').replace('**', '').strip()
+            story.append(Spacer(1, 0.15*inch))
+            story.append(Paragraph(titulo, heading1))
+            story.append(Spacer(1, 0.08*inch))
+        elif linha.startswith('##'):
+            titulo = linha.replace('##', '').replace('**', '').strip()
+            story.append(Spacer(1, 0.08*inch))
+            story.append(Paragraph(titulo, heading2))
+            story.append(Spacer(1, 0.06*inch))
+        elif linha.startswith('[**'):
+            pass
+        elif linha.startswith('---'):
+            story.append(Spacer(1, 0.2*inch))
+        else:
+            clean_text = linha.replace('**', '').replace('*', '').replace('`', '').strip()
+            if clean_text and len(clean_text) > 2:
+                try:
+                    story.append(Paragraph(clean_text, body))
+                except:
+                    pass
+    
+    # PÁGINA FINAL: IMAGENS
+    story.append(PageBreak())
+    story.append(Paragraph("SUGESTÕES DE IMAGENS PARA CANVA", heading1))
+    story.append(Spacer(1, 0.2*inch))
+    
+    linhas_imagens = sugestoes_imagens.split('\n')
+    for linha in linhas_imagens:
+        linha = linha.strip()
+        if linha and len(linha) > 2:
+            clean = linha.replace('**', '').replace('*', '')
+            try:
+                story.append(Paragraph(clean, body))
+            except:
+                pass
+    
+    doc.build(story)
+    buffer.seek(0)
+    return buffer.getvalue()
+
 # INICIALIZAR STATE
 if "ebooks" not in st.session_state:
     st.session_state.ebooks = []
@@ -247,7 +409,7 @@ ESTILOS_ARTE = {
 st.markdown("""
     <div class="header-premium">
         <h1>📚 Ebook Creator Pro Premium</h1>
-        <p>Crie ebooks profissionais com CONTROLE TOTAL + Imagens IA</p>
+        <p>Crie ebooks profissionais com PDF tipo ebook REAL</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -258,27 +420,21 @@ tab1, tab2, tab3 = st.tabs(["✍️ Criar Ebook", "📚 Meus Ebooks", "📊 Dash
 with tab1:
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
-    # SECAO 1: BASICO
     st.markdown('<div class="section-header"><h2>1️⃣ Configuração Básica</h2></div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns([1.5, 1])
     with col1:
-        st.markdown('<div class="info-box">Selecione o tema principal do seu ebook</div>', unsafe_allow_html=True)
-        tema_option = st.selectbox(
-            "Tema",
-            list(TEMAS.keys()),
-            label_visibility="collapsed"
-        )
+        st.markdown('<div class="info-box">Selecione o tema principal</div>', unsafe_allow_html=True)
+        tema_option = st.selectbox("Tema", list(TEMAS.keys()), label_visibility="collapsed")
         tema_nome = tema_option.split(" ", 1)[1] if " " in tema_option else tema_option
         tema_desc = TEMAS[tema_option]
     
     with col2:
-        st.markdown('<div class="info-box">Público que irá ler</div>', unsafe_allow_html=True)
-        audience = st.text_input("👥 Público-alvo", "Mães portuguesas", label_visibility="collapsed")
+        st.markdown('<div class="info-box">Seu público-alvo</div>', unsafe_allow_html=True)
+        audience = st.text_input("Público-alvo", "Mães portuguesas", label_visibility="collapsed")
     
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
-    # SECAO 2: ESTRUTURA
     st.markdown('<div class="section-header"><h2>2️⃣ Estrutura do Ebook</h2></div>', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
@@ -309,7 +465,6 @@ with tab1:
     
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
-    # SECAO 3: IDIOMA E LOCALIZACAO
     st.markdown('<div class="section-header"><h2>3️⃣ Idioma & Localização</h2></div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
@@ -323,17 +478,15 @@ with tab1:
     
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
-    # SECAO 4: ESTILO VISUAL
-    st.markdown('<div class="section-header"><h2>4️⃣ Estilo Visual (para Imagens)</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"><h2>4️⃣ Estilo Visual</h2></div>', unsafe_allow_html=True)
     
     estilo_arte_option = st.selectbox("Estilo de Arte", list(ESTILOS_ARTE.keys()), label_visibility="collapsed")
     estilo_arte = estilo_arte_option.split(" ", 1)[1] if " " in estilo_arte_option else estilo_arte_option
     
-    st.markdown(f'<div class="info-box">Estilo selecionado: <strong>{ESTILOS_ARTE[estilo_arte_option]}</strong></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="info-box">Estilo: <strong>{ESTILOS_ARTE[estilo_arte_option]}</strong></div>', unsafe_allow_html=True)
     
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
-    # SECAO 5: DOWNLOADS
     st.markdown('<div class="section-header"><h2>5️⃣ Formatos de Download</h2></div>', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
@@ -342,11 +495,10 @@ with tab1:
     with col2:
         formato_word = st.checkbox("📋 Word", value=True)
     with col3:
-        formato_pdf = st.checkbox("🎨 PDF", value=True)
+        formato_pdf = st.checkbox("🎨 PDF Premium", value=True)
     
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
-    # BOTAO GERAR
     col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
     with col_btn2:
         if st.button("🚀 GERAR EBOOK PREMIUM", use_container_width=True, key="generate"):
@@ -361,7 +513,7 @@ with tab1:
                 progress_bar = st.progress(0)
                 status = st.empty()
                 
-                with st.spinner("⏳ Gerando conteúdo com IA Google Gemini..."):
+                with st.spinner("⏳ Gerando conteúdo com IA..."):
                     status.text("🔄 Conectando à IA...")
                     progress_bar.progress(30)
                     
@@ -371,11 +523,8 @@ PARAMETROS:
 - Capitulos: {num_chapters}
 - Palavras/cap: {palavras_capitulo}
 - Estilo: {estilo}
-- Visual: {ESTILOS_ARTE[estilo_arte_option]}
 
 ESTRUTURA:
-- CAPA: [Espaco para imagem]
-- TITULO
 - INTRODUCAO (2-3 paragrafos)
 - {num_chapters} CAPITULOS com conteudo detalhado
 - CONCLUSAO
@@ -387,12 +536,12 @@ Escreva COMPLETAMENTE em {idioma}."""
                     content = response.text
                     
                     progress_bar.progress(70)
-                    status.text("📸 Gerando sugestões de imagens...")
+                    status.text("📸 Gerando sugestões...")
                     
-                    prompt_imagens = f"""Crie 10 prompts de imagem para usar em Canva/DALL-E baseado neste ebook sobre '{tema_desc}'.
+                    prompt_imagens = f"""Crie 10 prompts de imagem para '{tema_desc}' em estilo {ESTILOS_ARTE[estilo_arte_option]}.
                     
 Formato:
-[Numero]. [Titulo]: [Descricao detalhada em {idioma} com estilo {ESTILOS_ARTE[estilo_arte_option]}]"""
+[N]. [Titulo]: [Descricao em {idioma}]"""
                     
                     response_imagens = model.generate_content(prompt_imagens)
                     sugestoes_imagens = response_imagens.text
@@ -416,7 +565,6 @@ Formato:
                 
                 st.markdown('<div class="success-box"><strong>✅ Ebook gerado com sucesso!</strong></div>', unsafe_allow_html=True)
                 
-                # TABS RESULTADO
                 res_col1, res_col2 = st.tabs(["📖 Conteúdo", "🎨 Prompts de Imagens"])
                 
                 with res_col1:
@@ -434,8 +582,8 @@ Formato:
                 
                 if formato_txt:
                     with col_d1:
-                        txt = f"{tema_nome}\n\nPor Luciana Britto | L&B Marketing\n{idioma} | {regiao}\n{datetime.now().strftime('%d/%m/%Y')}\n\n{content}\n\n--- IMAGENS ---\n{sugestoes_imagens}"
-                        st.download_button("📄 Download TXT", txt, f"{tema_nome}.txt", "text/plain", use_container_width=True)
+                        txt = f"{tema_nome}\n\nPor Luciana Britto | L&B Marketing\n{idioma} | {regiao}\n{datetime.now().strftime('%d/%m/%Y')}\n\n{content}\n\n--- IMAGENS ---\n{sugestoes_imagens}\n\nCopyright 2026 Luciana Britto"
+                        st.download_button("📄 TXT", txt, f"{tema_nome}.txt", "text/plain", use_container_width=True)
                 
                 if formato_word:
                     with col_d2:
@@ -453,27 +601,12 @@ Formato:
                         doc_bytes = BytesIO()
                         doc.save(doc_bytes)
                         doc_bytes.seek(0)
-                        st.download_button("📋 Download Word", doc_bytes.getvalue(), f"{tema_nome}.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
+                        st.download_button("📋 Word", doc_bytes.getvalue(), f"{tema_nome}.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
                 
                 if formato_pdf:
                     with col_d3:
-                        buffer = BytesIO()
-                        doc = SimpleDocTemplate(buffer, pagesize=letter)
-                        story = []
-                        styles = getSampleStyleSheet()
-                        
-                        title_style = ParagraphStyle('T', parent=styles['Heading1'], fontSize=28, textColor=colors.HexColor('#6366f1'), alignment=TA_CENTER)
-                        body_style = ParagraphStyle('B', parent=styles['BodyText'], fontSize=11, alignment=TA_JUSTIFY)
-                        
-                        story.append(Paragraph(tema_nome, title_style))
-                        story.append(Spacer(1, 0.2*inch))
-                        story.append(Paragraph(f"{idioma} | {regiao}", styles['Normal']))
-                        story.append(PageBreak())
-                        story.append(Paragraph(content, body_style))
-                        
-                        doc.build(story)
-                        buffer.seek(0)
-                        st.download_button("🎨 Download PDF", buffer.getvalue(), f"{tema_nome}.pdf", "application/pdf", use_container_width=True)
+                        pdf_data = gerar_pdf_profissional(tema_nome, audience, idioma, regiao, content, sugestoes_imagens)
+                        st.download_button("🎨 PDF Premium", pdf_data, f"{tema_nome}.pdf", "application/pdf", use_container_width=True)
                 
             except Exception as e:
                 st.error(f"❌ Erro: {str(e)}")
@@ -483,16 +616,16 @@ with tab2:
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
     if not st.session_state.ebooks:
-        st.info("📭 Nenhum ebook criado ainda. Comece agora na aba 'Criar Ebook'!")
+        st.info("📭 Nenhum ebook criado. Comece agora!")
     else:
-        st.markdown(f"### 📚 Total: {len(st.session_state.ebooks)} Ebooks Criados")
+        st.markdown(f"### 📚 Total: {len(st.session_state.ebooks)} Ebooks")
         
         for ebook in reversed(st.session_state.ebooks):
             with st.expander(f"📖 {ebook['tema']} ({ebook['idioma']}) • {ebook['capitulos']} cap • {ebook['data']}", expanded=False):
                 col1, col2 = st.columns([3, 1])
                 with col1:
-                    st.markdown(f"**👥 Público:** {ebook['publico']}")
-                    st.markdown(f"**🎨 Estilo:** {ebook['estilo_arte']}")
+                    st.markdown(f"**Público:** {ebook['publico']}")
+                    st.markdown(f"**Estilo:** {ebook['estilo_arte']}")
                     st.write(ebook['conteudo'][:400] + "...")
 
 # TAB 3: DASHBOARD
@@ -506,10 +639,10 @@ with tab3:
     
     with col2:
         total = sum([e['capitulos'] for e in st.session_state.ebooks]) if st.session_state.ebooks else 0
-        st.markdown(f'<div class="metric-box"><h3>{total}</h3><p>Capítulos Gerados</p></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-box"><h3>{total}</h3><p>Capítulos</p></div>', unsafe_allow_html=True)
     
     with col3:
-        st.markdown('<div class="metric-box"><h3>12</h3><p>Temas Disponíveis</p></div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-box"><h3>12</h3><p>Temas</p></div>', unsafe_allow_html=True)
     
     with col4:
         st.markdown('<div class="metric-box"><h3>∞</h3><p>Uso GRÁTIS</p></div>', unsafe_allow_html=True)
@@ -518,7 +651,7 @@ with tab3:
 st.markdown("""
     <div class="footer-custom">
         <p><strong>Luciana Britto | L&B Marketing — Estratégias de Valor</strong></p>
-        <p>© 2026 • Ferramenta Premium de IA para Empreendoras Portuguesas</p>
+        <p>© 2026 • Ferramenta Premium de IA para Empreendoras</p>
         <p style="font-size: 12px; opacity: 0.7;">Powered by Google Gemini AI</p>
     </div>
 """, unsafe_allow_html=True)
