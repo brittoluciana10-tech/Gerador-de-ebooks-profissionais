@@ -136,178 +136,8 @@ st.markdown("""
         color: #f1f5f9 !important;
     }
     
-    /* ONBOARDING */
-    .onboarding-container {
-        background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 50%, #f0f9ff 100%);
-        min-height: 100vh;
-        padding: 60px 20px;
-    }
-    
-    .onboarding-header {
-        text-align: center;
-        margin-bottom: 60px;
-    }
-    
-    .onboarding-header h1 {
-        font-size: 56px;
-        font-weight: 800;
-        color: #0c2340;
-        margin: 0 0 12px 0;
-        letter-spacing: -1px;
-    }
-    
-    .onboarding-header p {
-        font-size: 24px;
-        color: #1e40af;
-        margin: 0;
-        font-weight: 500;
-    }
-    
-    .card-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 24px;
-        max-width: 1200px;
-        margin: 0 auto 80px auto;
-        padding: 0 20px;
-    }
-    
-    .option-card {
-        background: white;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-    
-    .option-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-    }
-    
-    .card-image {
-        width: 100%;
-        height: 180px;
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 72px;
-    }
-    
-    .card-content {
-        padding: 24px;
-    }
-    
-    .card-content h3 {
-        font-size: 20px;
-        font-weight: 700;
-        color: #0c2340;
-        margin: 0 0 8px 0;
-    }
-    
-    .card-content p {
-        font-size: 14px;
-        color: #64748b;
-        margin: 0;
-        line-height: 1.5;
-    }
-    
-    .recent-prompts {
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 0 20px;
-    }
-    
-    .recent-prompts h2 {
-        font-size: 28px;
-        font-weight: 700;
-        color: #0c2340;
-        margin: 0 0 24px 0;
-        text-align: center;
-    }
-    
-    .prompt-item {
-        background: white;
-        border-radius: 12px;
-        padding: 20px 24px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-        margin-bottom: 12px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .prompt-item:hover {
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-        transform: translateX(4px);
-    }
-    
-    .prompt-title {
-        font-size: 16px;
-        font-weight: 600;
-        color: #0c2340;
-        margin: 0 0 4px 0;
-    }
-    
-    .prompt-meta {
-        font-size: 12px;
-        color: #94a3b8;
-        margin: 0;
-    }
-    
-    .metric-box {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        border-radius: 12px;
-        padding: 20px;
-        text-align: center;
-        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .metric-box h3 {
-        color: white !important;
-        font-size: 36px !important;
-        margin: 0 !important;
-        font-weight: 800;
-    }
-    
-    .metric-box p {
-        color: rgba(255, 255, 255, 0.85) !important;
-        font-size: 13px !important;
-        margin: 8px 0 0 0 !important;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: 600;
-    }
-    
-    .template-card {
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
-        border: 1px solid rgba(99, 102, 241, 0.2);
-        border-radius: 16px;
-        padding: 24px;
-        margin: 12px 0;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .template-card:hover {
-        transform: translateX(8px);
-        border-color: #6366f1;
-        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
-    }
-    
-    .template-title {
-        font-size: 18px;
-        font-weight: 700;
-        color: #6366f1;
-        margin: 0 0 8px 0;
-    }
-    
-    .template-desc {
-        font-size: 14px;
-        color: #cbd5e1;
-        margin: 0;
+    .onboarding-bg {
+        background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 50%, #f0f9ff 100%) !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -540,26 +370,52 @@ TEMPLATES = {
     "❓ FAQ": "Perguntas frequentes com respostas detalhadas",
 }
 
-# PAGE: ONBOARDING
+# PAGE: ONBOARDING - CORRIGIDO
 if st.session_state.page == "onboarding":
+    # Aplicar background
     st.markdown("""
-        <div class="onboarding-container">
-            <div class="onboarding-header">
-                <h1>Criar com IA</h1>
-                <p>Como você quer começar?</p>
-            </div>
+        <style>
+        .stApp {
+            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 50%, #f0f9ff 100%) !important;
+        }
+        [data-testid="stAppViewContainer"] {
+            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 50%, #f0f9ff 100%) !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    # HEADER
+    st.markdown("""
+        <div style="text-align: center; margin: 60px 0 40px 0;">
+            <h1 style="font-size: 56px; font-weight: 800; color: #0c2340; margin: 0;">Criar com IA</h1>
+            <p style="font-size: 24px; color: #1e40af; margin: 12px 0 0 0; font-weight: 500;">Como você quer começar?</p>
         </div>
     """, unsafe_allow_html=True)
     
-    col1, col2, col3, col4 = st.columns(4)
+    # CARDS
+    col1, col2, col3, col4 = st.columns(4, gap="medium")
     
     with col1:
         st.markdown("""
-            <div class="option-card">
-                <div class="card-image">📚</div>
-                <div class="card-content">
-                    <h3>Gerar</h3>
-                    <p>Criar a partir de um prompt em poucos segundos</p>
+            <div style="
+                background: white;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                height: 100%;
+            ">
+                <div style="
+                    width: 100%;
+                    height: 180px;
+                    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 72px;
+                ">📚</div>
+                <div style="padding: 24px;">
+                    <h3 style="font-size: 20px; font-weight: 700; color: #0c2340; margin: 0 0 8px 0;">Gerar</h3>
+                    <p style="font-size: 14px; color: #64748b; margin: 0; line-height: 1.5;">Criar a partir de um prompt em poucos segundos</p>
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -569,11 +425,25 @@ if st.session_state.page == "onboarding":
     
     with col2:
         st.markdown("""
-            <div class="option-card">
-                <div class="card-image">✏️</div>
-                <div class="card-content">
-                    <h3>Colar texto</h3>
-                    <p>Criar a partir de anotações ou conteúdo existente</p>
+            <div style="
+                background: white;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                height: 100%;
+            ">
+                <div style="
+                    width: 100%;
+                    height: 180px;
+                    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 72px;
+                ">✏️</div>
+                <div style="padding: 24px;">
+                    <h3 style="font-size: 20px; font-weight: 700; color: #0c2340; margin: 0 0 8px 0;">Colar texto</h3>
+                    <p style="font-size: 14px; color: #64748b; margin: 0; line-height: 1.5;">Criar a partir de anotações ou conteúdo existente</p>
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -583,11 +453,25 @@ if st.session_state.page == "onboarding":
     
     with col3:
         st.markdown("""
-            <div class="option-card">
-                <div class="card-image">📋</div>
-                <div class="card-content">
-                    <h3>Usar modelo</h3>
-                    <p>Crie usando a estrutura de um modelo</p>
+            <div style="
+                background: white;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                height: 100%;
+            ">
+                <div style="
+                    width: 100%;
+                    height: 180px;
+                    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 72px;
+                ">📋</div>
+                <div style="padding: 24px;">
+                    <h3 style="font-size: 20px; font-weight: 700; color: #0c2340; margin: 0 0 8px 0;">Usar modelo</h3>
+                    <p style="font-size: 14px; color: #64748b; margin: 0; line-height: 1.5;">Crie usando a estrutura de um modelo</p>
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -597,11 +481,25 @@ if st.session_state.page == "onboarding":
     
     with col4:
         st.markdown("""
-            <div class="option-card">
-                <div class="card-image">📂</div>
-                <div class="card-content">
-                    <h3>Importar</h3>
-                    <p>Aprimorar documentos ou páginas existentes</p>
+            <div style="
+                background: white;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                height: 100%;
+            ">
+                <div style="
+                    width: 100%;
+                    height: 180px;
+                    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 72px;
+                ">📂</div>
+                <div style="padding: 24px;">
+                    <h3 style="font-size: 20px; font-weight: 700; color: #0c2340; margin: 0 0 8px 0;">Importar</h3>
+                    <p style="font-size: 14px; color: #64748b; margin: 0; line-height: 1.5;">Aprimorar documentos ou páginas existentes</p>
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -609,27 +507,37 @@ if st.session_state.page == "onboarding":
             st.session_state.page = "importar"
             st.rerun()
     
+    # PROMPTS RECENTES
     st.markdown("""
-        <div style="margin-top: 80px;">
-        <div class="recent-prompts">
-            <h2>Seus prompts recentes</h2>
-        </div>
+        <div style="margin-top: 80px; text-align: center;">
+            <h2 style="font-size: 28px; font-weight: 700; color: #0c2340; margin: 0 0 24px 0;">Seus prompts recentes</h2>
         </div>
     """, unsafe_allow_html=True)
     
-    recent_items = [
-        {"title": "Gerar um ebook sobre maternidade real", "meta": "Gerar • há 2 dias"},
-        {"title": "Criar conteúdo sobre bem-estar mental", "meta": "Colar texto • há 5 dias"},
-        {"title": "Transformar artigo em ebook profissional", "meta": "Importar • há 1 semana"},
-    ]
+    col_spacer, col_content, col_spacer2 = st.columns([0.5, 2, 0.5])
     
-    for item in recent_items:
-        st.markdown(f"""
-            <div class="prompt-item">
-                <p class="prompt-title">{item['title']}</p>
-                <p class="prompt-meta">{item['meta']}</p>
-            </div>
-        """, unsafe_allow_html=True)
+    with col_content:
+        recent_items = [
+            {"title": "Gerar um ebook sobre maternidade real", "meta": "Gerar • há 2 dias"},
+            {"title": "Criar conteúdo sobre bem-estar mental", "meta": "Colar texto • há 5 dias"},
+            {"title": "Transformar artigo em ebook profissional", "meta": "Importar • há 1 semana"},
+        ]
+        
+        for item in recent_items:
+            st.markdown(f"""
+                <div style="
+                    background: white;
+                    border-radius: 12px;
+                    padding: 20px 24px;
+                    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+                    margin-bottom: 12px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                ">
+                    <p style="font-size: 16px; font-weight: 600; color: #0c2340; margin: 0 0 4px 0;">{item['title']}</p>
+                    <p style="font-size: 12px; color: #94a3b8; margin: 0;">{item['meta']}</p>
+                </div>
+            """, unsafe_allow_html=True)
 
 # PAGE: CRIAR EBOOK (GERAR COM IA)
 elif st.session_state.page == "criar":
@@ -800,11 +708,33 @@ elif st.session_state.page == "modelo":
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     st.markdown('<div class="section-header"><h2>Escolha um Modelo</h2></div>', unsafe_allow_html=True)
     
-    selected_template = None
-    for template_name, template_desc in TEMPLATES.items():
-        if st.button(f"{template_name}", key=f"template_{template_name}"):
-            selected_template = template_name
-            st.session_state.selected_template = template_name
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("📖 Guia Completo", use_container_width=True):
+            st.session_state.selected_template = "📖 Guia Completo"
+    
+    with col2:
+        if st.button("📋 Check-list", use_container_width=True):
+            st.session_state.selected_template = "📋 Check-list"
+    
+    with col3:
+        if st.button("💡 Dicas Rápidas", use_container_width=True):
+            st.session_state.selected_template = "💡 Dicas Rápidas"
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("📊 Análise Dados", use_container_width=True):
+            st.session_state.selected_template = "📊 Análise Dados"
+    
+    with col2:
+        if st.button("🎯 Plano de Ação", use_container_width=True):
+            st.session_state.selected_template = "🎯 Plano de Ação"
+    
+    with col3:
+        if st.button("❓ FAQ", use_container_width=True):
+            st.session_state.selected_template = "❓ FAQ"
     
     if hasattr(st.session_state, 'selected_template'):
         selected_template = st.session_state.selected_template
@@ -883,7 +813,7 @@ elif st.session_state.page == "importar":
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     st.markdown('<div class="section-header"><h2>Escolha uma opção</h2></div>', unsafe_allow_html=True)
     
-    import_type = st.radio("Como quer importar?", ["📤 Upload de Arquivo", "🔗 URL"])
+    import_type = st.radio("Como quer importar?", ["📤 Upload de Arquivo", "🔗 URL"], horizontal=True)
     
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
@@ -893,7 +823,6 @@ elif st.session_state.page == "importar":
         if arquivo:
             st.success(f"✅ Arquivo carregado: {arquivo.name}")
             
-            # Ler conteúdo
             try:
                 if arquivo.name.endswith('.txt'):
                     conteudo_arquivo = arquivo.getvalue().decode()
@@ -1019,6 +948,7 @@ elif st.session_state.page == "importar":
 st.markdown("""
     <div class="footer-custom">
         <p><strong>Luciana Britto | L&B Marketing — Estratégias de Valor</strong></p>
-        <p>© 2026 • Ferramenta Premium de IA</p>
+        <p>© 2026 • Ferramenta Premium de IA para Empreendoras</p>
+        <p style="font-size: 12px; opacity: 0.7;">Powered by Google Gemini AI</p>
     </div>
 """, unsafe_allow_html=True)
