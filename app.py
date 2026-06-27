@@ -136,8 +136,56 @@ st.markdown("""
         color: #f1f5f9 !important;
     }
     
-    .onboarding-bg {
-        background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 50%, #f0f9ff 100%) !important;
+    .type-selector {
+        display: flex;
+        gap: 12px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+    }
+    
+    .type-btn {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        flex: 1;
+        min-width: 140px;
+    }
+    
+    .type-btn:hover {
+        border-color: #6366f1;
+        transform: translateY(-4px);
+    }
+    
+    .type-btn.active {
+        background: #6366f1;
+        color: white;
+        border-color: #6366f1;
+    }
+    
+    .type-btn-icon {
+        font-size: 32px;
+        display: block;
+        margin-bottom: 8px;
+    }
+    
+    .type-btn-label {
+        font-weight: 600;
+        font-size: 14px;
+    }
+    
+    .tipo-badge {
+        display: inline-block;
+        background: #10b981;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 8px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -328,6 +376,9 @@ if "ebooks" not in st.session_state:
 if "page" not in st.session_state:
     st.session_state.page = "onboarding"
 
+if "selected_type" not in st.session_state:
+    st.session_state.selected_type = "Documento"
+
 # TEMAS
 TEMAS = {
     "🤰 Maternidade Real": "Maternidade real, mães, experiências honestas",
@@ -361,6 +412,21 @@ ESTILOS_ARTE = {
     "⬜ Minimalista": "Design minimalista e limpo",
 }
 
+TIPOS_DOCUMENTO = {
+    "Apresentação": "📊",
+    "Página da Web": "🌐",
+    "Documento": "📄",
+    "Social": "📱",
+    "Gráfico": "📈",
+}
+
+ESTILOS = {
+    "Clássico": "Design clássico e profissional",
+    "Moderno": "Design moderno e inovador",
+    "Padrão": "Design padrão e balanceado",
+    "Criativo": "Design criativo e único",
+}
+
 TEMPLATES = {
     "📖 Guia Completo": "Um guia detalhado com introdução, capítulos e conclusão",
     "📋 Check-list": "Lista de verificação, dicas e boas práticas",
@@ -370,9 +436,8 @@ TEMPLATES = {
     "❓ FAQ": "Perguntas frequentes com respostas detalhadas",
 }
 
-# PAGE: ONBOARDING - CORRIGIDO
+# PAGE: ONBOARDING
 if st.session_state.page == "onboarding":
-    # Aplicar background
     st.markdown("""
         <style>
         .stApp {
@@ -384,7 +449,6 @@ if st.session_state.page == "onboarding":
         </style>
     """, unsafe_allow_html=True)
     
-    # HEADER
     st.markdown("""
         <div style="text-align: center; margin: 60px 0 40px 0;">
             <h1 style="font-size: 56px; font-weight: 800; color: #0c2340; margin: 0;">Criar com IA</h1>
@@ -392,7 +456,6 @@ if st.session_state.page == "onboarding":
         </div>
     """, unsafe_allow_html=True)
     
-    # CARDS
     col1, col2, col3, col4 = st.columns(4, gap="medium")
     
     with col1:
@@ -507,7 +570,6 @@ if st.session_state.page == "onboarding":
             st.session_state.page = "importar"
             st.rerun()
     
-    # PROMPTS RECENTES
     st.markdown("""
         <div style="margin-top: 80px; text-align: center;">
             <h2 style="font-size: 28px; font-weight: 700; color: #0c2340; margin: 0 0 24px 0;">Seus prompts recentes</h2>
@@ -539,7 +601,7 @@ if st.session_state.page == "onboarding":
                 </div>
             """, unsafe_allow_html=True)
 
-# PAGE: CRIAR EBOOK (GERAR COM IA)
+# PAGE: CRIAR EBOOK - COM NOVAS FUNCOES
 elif st.session_state.page == "criar":
     if st.button("← Voltar", key="back_criar"):
         st.session_state.page = "onboarding"
@@ -548,307 +610,90 @@ elif st.session_state.page == "criar":
     st.markdown("""
         <div class="header-premium">
             <h1>📚 Gerar Ebook com IA</h1>
-            <p>A partir de um simples prompt</p>
+            <p>O que você gostaria de criar hoje?</p>
         </div>
     """, unsafe_allow_html=True)
     
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
-    st.markdown('<div class="section-header"><h2>1️⃣ Seu Prompt</h2></div>', unsafe_allow_html=True)
-    prompt_user = st.text_area("Descreva o ebook que quer criar", placeholder="Ex: Gerar um ebook sobre maternidade real para mães portuguesas com 5 capítulos", height=100)
+    # SELETOR DE TIPO
+    st.markdown('<div class="section-header"><h2>1️⃣ Tipo de Documento</h2></div>', unsafe_allow_html=True)
+    
+    col1, col2, col3, col4, col5 = st.columns(5, gap="small")
+    
+    tipos_lista = list(TIPOS_DOCUMENTO.items())
+    
+    with col1:
+        if st.button(f"{tipos_lista[0][1]}\n{tipos_lista[0][0]}", use_container_width=True, key="type_0"):
+            st.session_state.selected_type = tipos_lista[0][0]
+    
+    with col2:
+        if st.button(f"{tipos_lista[1][1]}\n{tipos_lista[1][0]}", use_container_width=True, key="type_1"):
+            st.session_state.selected_type = tipos_lista[1][0]
+    
+    with col3:
+        if st.button(f"{tipos_lista[2][1]}\n{tipos_lista[2][0]}", use_container_width=True, key="type_2"):
+            st.session_state.selected_type = tipos_lista[2][0]
+    
+    with col4:
+        if st.button(f"{tipos_lista[3][1]}\n{tipos_lista[3][0]}", use_container_width=True, key="type_3"):
+            st.session_state.selected_type = tipos_lista[3][0]
+    
+    with col5:
+        if st.button(f"{tipos_lista[4][1]}\n{tipos_lista[4][0]}", use_container_width=True, key="type_4"):
+            st.session_state.selected_type = tipos_lista[4][0]
+    
+    st.markdown(f'<div class="success-box"><strong>✅ Selecionado: {st.session_state.selected_type}</strong></div>', unsafe_allow_html=True)
     
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
+    
+    # CONFIGURACOES
     st.markdown('<div class="section-header"><h2>2️⃣ Configurações</h2></div>', unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
+    
     with col1:
-        num_chapters = st.slider("Capítulos", 2, 10, 5)
+        num_itens = st.selectbox("Quantidade", ["5", "10", "15", "20", "25"], key="qtd_criar")
+    
     with col2:
-        palavras_capitulo = st.select_slider("Palavras/Cap", options=[200, 400, 600, 800, 1000], value=600)
+        estilo_select = st.selectbox("Estilo", list(ESTILOS.keys()), key="estilo_criar")
+    
     with col3:
-        idioma_option = st.selectbox("Idioma", list(IDIOMAS.keys()))
+        idioma_option = st.selectbox("Idioma", list(IDIOMAS.keys()), key="idioma_criar")
     
-    st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-header"><h2>3️⃣ Formatos</h2></div>', unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        formato_txt = st.checkbox("📄 TXT", value=True)
-    with col2:
-        formato_word = st.checkbox("📋 Word", value=True)
-    with col3:
-        formato_pdf = st.checkbox("🎨 PDF", value=True)
+    with col4:
+        regiao = st.selectbox("Região", ["Portugal", "Brasil", "Angola", "Moçambique"], key="regiao_criar")
     
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
-    if st.button("🚀 GERAR EBOOK", use_container_width=True, key="gen_criar"):
-        if prompt_user.strip():
-            try:
-                api_key = st.secrets["GEMINI_API_KEY"]
-                genai.configure(api_key=api_key)
-                models = [m.name for m in genai.list_models()]
-                model_name = [m for m in models if "gemini" in m.lower()][0]
-                model = genai.GenerativeModel(model_name)
-                
-                progress = st.progress(0)
-                status = st.empty()
-                
-                status.text("🔄 Gerando conteúdo...")
-                progress.progress(30)
-                
-                prompt_final = f"{prompt_user}\n\nFormato: {num_chapters} capítulos, ~{palavras_capitulo} palavras cada, em {IDIOMAS[idioma_option]}"
-                response = model.generate_content(prompt_final)
-                content = response.text
-                
-                progress.progress(70)
-                status.text("📸 Gerando sugestões...")
-                
-                response_img = model.generate_content(f"Crie 10 prompts de imagem para este ebook: {prompt_user[:100]}")
-                sugestoes = response_img.text
-                
-                progress.progress(100)
-                st.markdown('<div class="success-box"><strong>✅ Ebook gerado!</strong></div>', unsafe_allow_html=True)
-                
-                with st.expander("Ver conteúdo", expanded=False):
-                    st.write(content)
-                
-                st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-                fazer_download_ebook("Ebook-Gerado", "Público geral", IDIOMAS[idioma_option], "Portugal", content, sugestoes, formato_txt, formato_word, formato_pdf)
-            except Exception as e:
-                st.error(f"Erro: {str(e)}")
-        else:
-            st.warning("Por favor, descreva o ebook que quer criar!")
-
-# PAGE: COLAR TEXTO
-elif st.session_state.page == "colar":
-    if st.button("← Voltar", key="back_colar"):
-        st.session_state.page = "onboarding"
-        st.rerun()
-    
-    st.markdown("""
-        <div class="header-premium">
-            <h1>✏️ Transformar Texto em Ebook</h1>
-            <p>Cole seu conteúdo e transforme em profissional</p>
-        </div>
-    """, unsafe_allow_html=True)
+    # INPUT TEXT
+    st.markdown('<div class="section-header"><h2>3️⃣ Descrição</h2></div>', unsafe_allow_html=True)
+    prompt_user = st.text_area(
+        "O que você quer criar?",
+        placeholder="Ex: Brainstorming e criação de novas ideias para criação de conteúdo",
+        height=120
+    )
     
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
-    conteudo_colado = st.text_area("Cole seu conteúdo", placeholder="Cole aqui anotações, artigos, ou qualquer texto", height=250)
-    
-    st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        titulo_ebook = st.text_input("Título do Ebook", "Meu Ebook Profissional")
-    with col2:
-        idioma_option = st.selectbox("Idioma", list(IDIOMAS.keys()), key="idioma_colar")
+    # FORMATOS
+    st.markdown('<div class="section-header"><h2>4️⃣ Formatos de Download</h2></div>', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        formato_txt = st.checkbox("📄 TXT", value=True, key="txt_colar")
+        formato_txt = st.checkbox("📄 TXT", value=True, key="txt_criar")
     with col2:
-        formato_word = st.checkbox("📋 Word", value=True, key="word_colar")
+        formato_word = st.checkbox("📋 Word", value=True, key="word_criar")
     with col3:
-        formato_pdf = st.checkbox("🎨 PDF", value=True, key="pdf_colar")
+        formato_pdf = st.checkbox("🎨 PDF", value=True, key="pdf_criar")
     
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
-    if st.button("🚀 TRANSFORMAR", use_container_width=True, key="gen_colar"):
-        if conteudo_colado.strip():
-            try:
-                api_key = st.secrets["GEMINI_API_KEY"]
-                genai.configure(api_key=api_key)
-                models = [m.name for m in genai.list_models()]
-                model_name = [m for m in models if "gemini" in m.lower()][0]
-                model = genai.GenerativeModel(model_name)
-                
-                progress = st.progress(0)
-                status = st.empty()
-                
-                status.text("🔄 Estruturando conteúdo...")
-                progress.progress(30)
-                
-                prompt = f"Transforme este texto em um ebook bem estruturado em {IDIOMAS[idioma_option]}, com capítulos, introdução e conclusão:\n\n{conteudo_colado}"
-                response = model.generate_content(prompt)
-                content = response.text
-                
-                progress.progress(70)
-                status.text("📸 Gerando sugestões...")
-                
-                response_img = model.generate_content(f"Crie 10 prompts de imagem para este conteúdo: {conteudo_colado[:100]}")
-                sugestoes = response_img.text
-                
-                progress.progress(100)
-                st.markdown('<div class="success-box"><strong>✅ Transformado com sucesso!</strong></div>', unsafe_allow_html=True)
-                
-                with st.expander("Ver conteúdo", expanded=False):
-                    st.write(content)
-                
-                st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-                fazer_download_ebook(titulo_ebook, "Leitores", IDIOMAS[idioma_option], "Portugal", content, sugestoes, formato_txt, formato_word, formato_pdf)
-            except Exception as e:
-                st.error(f"Erro: {str(e)}")
-        else:
-            st.warning("Cole seu conteúdo para começar!")
-
-# PAGE: USAR MODELO
-elif st.session_state.page == "modelo":
-    if st.button("← Voltar", key="back_modelo"):
-        st.session_state.page = "onboarding"
-        st.rerun()
-    
-    st.markdown("""
-        <div class="header-premium">
-            <h1>📋 Usar Modelo</h1>
-            <p>Escolha um modelo e customize com seus dados</p>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-header"><h2>Escolha um Modelo</h2></div>', unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        if st.button("📖 Guia Completo", use_container_width=True):
-            st.session_state.selected_template = "📖 Guia Completo"
-    
-    with col2:
-        if st.button("📋 Check-list", use_container_width=True):
-            st.session_state.selected_template = "📋 Check-list"
-    
-    with col3:
-        if st.button("💡 Dicas Rápidas", use_container_width=True):
-            st.session_state.selected_template = "💡 Dicas Rápidas"
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        if st.button("📊 Análise Dados", use_container_width=True):
-            st.session_state.selected_template = "📊 Análise Dados"
-    
-    with col2:
-        if st.button("🎯 Plano de Ação", use_container_width=True):
-            st.session_state.selected_template = "🎯 Plano de Ação"
-    
-    with col3:
-        if st.button("❓ FAQ", use_container_width=True):
-            st.session_state.selected_template = "❓ FAQ"
-    
-    if hasattr(st.session_state, 'selected_template'):
-        selected_template = st.session_state.selected_template
-        st.markdown(f'<div class="success-box"><strong>✅ Modelo selecionado: {selected_template}</strong></div>', unsafe_allow_html=True)
-        
-        st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-        st.markdown('<div class="section-header"><h2>Customize seu Ebook</h2></div>', unsafe_allow_html=True)
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            tema_option = st.selectbox("Tema", list(TEMAS.keys()), key="tema_modelo")
-            tema_nome = tema_option.split(" ", 1)[1] if " " in tema_option else tema_option
-        with col2:
-            idioma_option = st.selectbox("Idioma", list(IDIOMAS.keys()), key="idioma_modelo")
-        
-        audience = st.text_input("Público-alvo", "Público geral")
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            formato_txt = st.checkbox("📄 TXT", value=True, key="txt_modelo")
-        with col2:
-            formato_word = st.checkbox("📋 Word", value=True, key="word_modelo")
-        with col3:
-            formato_pdf = st.checkbox("🎨 PDF", value=True, key="pdf_modelo")
-        
-        st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-        
-        if st.button("🚀 GERAR A PARTIR DO MODELO", use_container_width=True, key="gen_modelo"):
-            try:
-                api_key = st.secrets["GEMINI_API_KEY"]
-                genai.configure(api_key=api_key)
-                models = [m.name for m in genai.list_models()]
-                model_name = [m for m in models if "gemini" in m.lower()][0]
-                model = genai.GenerativeModel(model_name)
-                
-                progress = st.progress(0)
-                status = st.empty()
-                
-                status.text("🔄 Gerando ebook a partir do modelo...")
-                progress.progress(30)
-                
-                prompt = f"Crie um ebook no formato '{selected_template}' sobre '{TEMAS[tema_option]}' para '{audience}' em {IDIOMAS[idioma_option]}"
-                response = model.generate_content(prompt)
-                content = response.text
-                
-                progress.progress(70)
-                status.text("📸 Gerando sugestões...")
-                
-                response_img = model.generate_content(f"Crie 10 prompts de imagem para: {TEMAS[tema_option]}")
-                sugestoes = response_img.text
-                
-                progress.progress(100)
-                st.markdown('<div class="success-box"><strong>✅ Ebook criado!</strong></div>', unsafe_allow_html=True)
-                
-                with st.expander("Ver conteúdo", expanded=False):
-                    st.write(content)
-                
-                st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-                fazer_download_ebook(tema_nome, audience, IDIOMAS[idioma_option], "Portugal", content, sugestoes, formato_txt, formato_word, formato_pdf)
-            except Exception as e:
-                st.error(f"Erro: {str(e)}")
-
-# PAGE: IMPORTAR
-elif st.session_state.page == "importar":
-    if st.button("← Voltar", key="back_importar"):
-        st.session_state.page = "onboarding"
-        st.rerun()
-    
-    st.markdown("""
-        <div class="header-premium">
-            <h1>📂 Importar & Transformar</h1>
-            <p>Upload de arquivo ou URL</p>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-header"><h2>Escolha uma opção</h2></div>', unsafe_allow_html=True)
-    
-    import_type = st.radio("Como quer importar?", ["📤 Upload de Arquivo", "🔗 URL"], horizontal=True)
-    
-    st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-    
-    if import_type == "📤 Upload de Arquivo":
-        arquivo = st.file_uploader("Selecione um arquivo (TXT, DOCX, PDF)", type=["txt", "docx", "pdf"])
-        
-        if arquivo:
-            st.success(f"✅ Arquivo carregado: {arquivo.name}")
-            
-            try:
-                if arquivo.name.endswith('.txt'):
-                    conteudo_arquivo = arquivo.getvalue().decode()
-                elif arquivo.name.endswith('.docx'):
-                    from docx import Document as DocRead
-                    doc = DocRead(arquivo)
-                    conteudo_arquivo = "\n".join([p.text for p in doc.paragraphs])
-                else:
-                    conteudo_arquivo = "[Arquivo PDF - extrair manualmente]"
-            except:
-                conteudo_arquivo = ""
-            
-            idioma_option = st.selectbox("Idioma", list(IDIOMAS.keys()), key="idioma_import")
-            titulo = st.text_input("Título do Ebook", arquivo.name.split('.')[0])
-            
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                formato_txt = st.checkbox("📄 TXT", value=True, key="txt_import")
-            with col2:
-                formato_word = st.checkbox("📋 Word", value=True, key="word_import")
-            with col3:
-                formato_pdf = st.checkbox("🎨 PDF", value=True, key="pdf_import")
-            
-            st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-            
-            if st.button("🚀 TRANSFORMAR ARQUIVO", use_container_width=True, key="gen_import_file"):
+    # BOTAO GERAR
+    col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
+    with col_btn2:
+        if st.button("✨ Gerar contorno", use_container_width=True, key="gen_criar"):
+            if prompt_user.strip():
                 try:
                     api_key = st.secrets["GEMINI_API_KEY"]
                     genai.configure(api_key=api_key)
@@ -859,96 +704,23 @@ elif st.session_state.page == "importar":
                     progress = st.progress(0)
                     status = st.empty()
                     
-                    status.text("🔄 Processando arquivo...")
+                    status.text("🔄 Gerando conteúdo...")
                     progress.progress(30)
                     
-                    prompt = f"Transforme este conteúdo em um ebook profissional bem estruturado em {IDIOMAS[idioma_option]}:\n\n{conteudo_arquivo[:2000]}"
-                    response = model.generate_content(prompt)
+                    prompt_final = f"Crie um {st.session_state.selected_type} em {IDIOMAS[idioma_option]} com {num_itens} itens sobre: {prompt_user}\n\nEstilo: {ESTILOS[estilo_select]}\nRegião: {regiao}"
+                    response = model.generate_content(prompt_final)
                     content = response.text
                     
                     progress.progress(70)
                     status.text("📸 Gerando sugestões...")
                     
-                    response_img = model.generate_content(f"Crie 10 prompts de imagem para este ebook")
+                    response_img = model.generate_content(f"Crie 10 prompts de imagem para: {prompt_user}")
                     sugestoes = response_img.text
                     
                     progress.progress(100)
-                    st.markdown('<div class="success-box"><strong>✅ Arquivo transformado!</strong></div>', unsafe_allow_html=True)
+                    st.markdown('<div class="success-box"><strong>✅ Conteúdo gerado!</strong></div>', unsafe_allow_html=True)
                     
                     with st.expander("Ver conteúdo", expanded=False):
                         st.write(content)
                     
                     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-                    fazer_download_ebook(titulo, "Leitores", IDIOMAS[idioma_option], "Portugal", content, sugestoes, formato_txt, formato_word, formato_pdf)
-                except Exception as e:
-                    st.error(f"Erro: {str(e)}")
-    
-    else:  # URL
-        url = st.text_input("Cole a URL")
-        
-        if url:
-            idioma_option = st.selectbox("Idioma", list(IDIOMAS.keys()), key="idioma_import_url")
-            titulo = st.text_input("Título do Ebook", "Ebook Importado")
-            
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                formato_txt = st.checkbox("📄 TXT", value=True, key="txt_import_url")
-            with col2:
-                formato_word = st.checkbox("📋 Word", value=True, key="word_import_url")
-            with col3:
-                formato_pdf = st.checkbox("🎨 PDF", value=True, key="pdf_import_url")
-            
-            st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-            
-            if st.button("🚀 TRANSFORMAR URL", use_container_width=True, key="gen_import_url"):
-                try:
-                    api_key = st.secrets["GEMINI_API_KEY"]
-                    genai.configure(api_key=api_key)
-                    models = [m.name for m in genai.list_models()]
-                    model_name = [m for m in models if "gemini" in m.lower()][0]
-                    model = genai.GenerativeModel(model_name)
-                    
-                    progress = st.progress(0)
-                    status = st.empty()
-                    
-                    status.text("🔄 Acessando URL...")
-                    progress.progress(20)
-                    
-                    try:
-                        response = requests.get(url, timeout=10)
-                        conteudo_url = response.text[:3000]
-                    except:
-                        conteudo_url = f"[URL: {url}]"
-                    
-                    progress.progress(40)
-                    status.text("🔄 Gerando ebook...")
-                    
-                    prompt = f"Transforme o conteúdo desta URL em um ebook profissional em {IDIOMAS[idioma_option]}: {conteudo_url}"
-                    response = model.generate_content(prompt)
-                    content = response.text
-                    
-                    progress.progress(70)
-                    status.text("📸 Gerando sugestões...")
-                    
-                    response_img = model.generate_content("Crie 10 prompts de imagem para este ebook")
-                    sugestoes = response_img.text
-                    
-                    progress.progress(100)
-                    st.markdown('<div class="success-box"><strong>✅ URL transformada!</strong></div>', unsafe_allow_html=True)
-                    
-                    with st.expander("Ver conteúdo", expanded=False):
-                        st.write(content)
-                    
-                    st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-                    fazer_download_ebook(titulo, "Leitores", IDIOMAS[idioma_option], "Portugal", content, sugestoes, formato_txt, formato_word, formato_pdf)
-                except Exception as e:
-                    st.error(f"Erro: {str(e)}")
-
-# FOOTER
-st.markdown("""
-    <div class="footer-custom">
-        <p><strong>Luciana Britto | L&B Marketing — Estratégias de Valor</strong></p>
-        <p>© 2026 • Ferramenta Premium de IA para Empreendoras</p>
-        <p style="font-size: 12px; opacity: 0.7;">Powered by Google Gemini AI</p>
-    </div>
-""", unsafe_allow_html=True)
