@@ -3,19 +3,14 @@ import google.generativeai as genai
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle, BarChart, PieChart, Drawing, AreaChart, LineChart
-from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
 from reportlab.lib import colors
-from reportlab.chart.barcharts import VerticalBarChart
-from reportlab.chart.piecharts import PieChart as RLPieChart
-from reportlab.chart.lineplots import LinePlot
-from reportlab.chart.axes import XValueAxis, YValueAxis
 from datetime import datetime
 from io import BytesIO
-import random
 
 st.set_page_config(
     page_title="Ebook Creator Pro Premium",
@@ -55,10 +50,6 @@ st.markdown("""
         background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
     }
     
-    .stButton>button:active {
-        transform: translateY(-2px) !important;
-    }
-    
     .header-premium {
         background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
         border-radius: 20px;
@@ -85,16 +76,6 @@ st.markdown("""
         font-weight: 500;
     }
     
-    .card-container {
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
-        border: 1px solid rgba(99, 102, 241, 0.2);
-        border-radius: 16px;
-        padding: 28px;
-        margin: 20px 0;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        backdrop-filter: blur(10px);
-    }
-    
     .section-header {
         display: flex;
         align-items: center;
@@ -109,61 +90,6 @@ st.markdown("""
         font-size: 22px !important;
         font-weight: 700 !important;
         margin: 0 !important;
-    }
-    
-    .metric-box {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        border-radius: 12px;
-        padding: 20px;
-        text-align: center;
-        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .metric-box h3 {
-        color: white !important;
-        font-size: 36px !important;
-        margin: 0 !important;
-        font-weight: 800;
-    }
-    
-    .metric-box p {
-        color: rgba(255, 255, 255, 0.85) !important;
-        font-size: 13px !important;
-        margin: 8px 0 0 0 !important;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: 600;
-    }
-    
-    [data-testid="stTabs"] [role="tablist"] {
-        gap: 8px;
-        border: none !important;
-    }
-    
-    [data-testid="stTabs"] [role="tab"] {
-        background: rgba(99, 102, 241, 0.1) !important;
-        border: 1px solid rgba(99, 102, 241, 0.2) !important;
-        border-radius: 10px !important;
-        padding: 12px 24px !important;
-        color: #cbd5e1 !important;
-        font-weight: 600 !important;
-        transition: all 0.3s ease !important;
-    }
-    
-    [data-testid="stTabs"] [role="tab"][aria-selected="true"] {
-        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
-        color: white !important;
-        border: 1px solid #4f46e5 !important;
-        box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3) !important;
-    }
-    
-    .stSlider [role="slider"] {
-        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
-    }
-    
-    .stSelectbox, .stTextInput, .stNumberInput {
-        border-radius: 10px !important;
     }
     
     .divider-premium {
@@ -208,41 +134,155 @@ st.markdown("""
     .footer-custom strong {
         color: #f1f5f9 !important;
     }
+    
+    /* ONBOARDING */
+    .onboarding-container {
+        background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 50%, #f0f9ff 100%);
+        min-height: 100vh;
+        padding: 60px 20px;
+    }
+    
+    .onboarding-header {
+        text-align: center;
+        margin-bottom: 60px;
+    }
+    
+    .onboarding-header h1 {
+        font-size: 56px;
+        font-weight: 800;
+        color: #0c2340;
+        margin: 0 0 12px 0;
+        letter-spacing: -1px;
+    }
+    
+    .onboarding-header p {
+        font-size: 24px;
+        color: #1e40af;
+        margin: 0;
+        font-weight: 500;
+    }
+    
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 24px;
+        max-width: 1200px;
+        margin: 0 auto 80px auto;
+        padding: 0 20px;
+    }
+    
+    .option-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .option-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card-image {
+        width: 100%;
+        height: 180px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 72px;
+    }
+    
+    .card-content {
+        padding: 24px;
+    }
+    
+    .card-content h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0c2340;
+        margin: 0 0 8px 0;
+    }
+    
+    .card-content p {
+        font-size: 14px;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.5;
+    }
+    
+    .recent-prompts {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    
+    .recent-prompts h2 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #0c2340;
+        margin: 0 0 24px 0;
+        text-align: center;
+    }
+    
+    .prompt-item {
+        background: white;
+        border-radius: 12px;
+        padding: 20px 24px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .prompt-item:hover {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        transform: translateX(4px);
+    }
+    
+    .prompt-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #0c2340;
+        margin: 0 0 4px 0;
+    }
+    
+    .prompt-meta {
+        font-size: 12px;
+        color: #94a3b8;
+        margin: 0;
+    }
+    
+    .metric-box {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .metric-box h3 {
+        color: white !important;
+        font-size: 36px !important;
+        margin: 0 !important;
+        font-weight: 800;
+    }
+    
+    .metric-box p {
+        color: rgba(255, 255, 255, 0.85) !important;
+        font-size: 13px !important;
+        margin: 8px 0 0 0 !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# FUNCAO: Criar gráfico de barras
-def criar_grafico_barras():
-    drawing = Drawing(400, 250)
-    bc = VerticalBarChart()
-    bc.x = 50
-    bc.y = 50
-    bc.width = 300
-    bc.height = 150
-    bc.data = [[10, 20, 30, 15, 25]]
-    bc.strokeColor = colors.black
-    bc.fillColor = colors.HexColor('#6366f1')
-    bc.categoryAxis.labels.boxAnchor = 'n'
-    bc.categoryAxis.labels.angle = 0
-    bc.categoryAxis.categoryNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai']
-    drawing.add(bc)
-    return drawing
-
-# FUNCAO: Criar gráfico de pizza
-def criar_grafico_pizza():
-    drawing = Drawing(400, 250)
-    pc = RLPieChart()
-    pc.x = 100
-    pc.y = 50
-    pc.width = 200
-    pc.height = 150
-    pc.data = [25, 35, 20, 20]
-    pc.labels = ['Categoria A', 'Categoria B', 'Categoria C', 'Categoria D']
-    pc.slices.strokeWidth = 2
-    drawing.add(pc)
-    return drawing
-
-# FUNCAO: Gerar PDF Profissional com Gráficos e Tabelas
+# FUNCAO: Gerar PDF Simples
 def gerar_pdf_profissional(tema, audience, idioma, regiao, conteudo, sugestoes_imagens):
     buffer = BytesIO()
     doc = SimpleDocTemplate(
@@ -257,7 +297,6 @@ def gerar_pdf_profissional(tema, audience, idioma, regiao, conteudo, sugestoes_i
     story = []
     styles = getSampleStyleSheet()
     
-    # ESTILOS CUSTOMIZADOS
     titulo_capa = ParagraphStyle(
         'TituloCapa',
         parent=styles['Heading1'],
@@ -354,7 +393,7 @@ def gerar_pdf_profissional(tema, audience, idioma, regiao, conteudo, sugestoes_i
     for idx, item in enumerate(indice_items, 1):
         story.append(Paragraph(f"{idx}. {item}", body))
     
-    # PÁGINA 3+: CONTEÚDO COM CAPÍTULOS EM NOVAS PÁGINAS
+    # CONTEÚDO
     story.append(PageBreak())
     
     linhas = conteudo.split('\n')
@@ -365,7 +404,6 @@ def gerar_pdf_profissional(tema, audience, idioma, regiao, conteudo, sugestoes_i
         if not linha:
             story.append(Spacer(1, 0.08*inch))
         elif linha.startswith('###'):
-            # Nova página para novo capítulo
             if current_chapter > 0:
                 story.append(PageBreak())
             current_chapter += 1
@@ -373,20 +411,6 @@ def gerar_pdf_profissional(tema, audience, idioma, regiao, conteudo, sugestoes_i
             titulo = linha.replace('###', '').replace('**', '').strip()
             story.append(Paragraph(titulo, heading1))
             story.append(Spacer(1, 0.2*inch))
-            
-            # Adicionar gráfico aleatório
-            if current_chapter % 2 == 0:
-                try:
-                    story.append(criar_grafico_barras())
-                    story.append(Spacer(1, 0.15*inch))
-                except:
-                    pass
-            elif current_chapter % 3 == 0:
-                try:
-                    story.append(criar_grafico_pizza())
-                    story.append(Spacer(1, 0.15*inch))
-                except:
-                    pass
         elif linha.startswith('##'):
             titulo = linha.replace('##', '').replace('**', '').strip()
             story.append(Paragraph(titulo, heading2))
@@ -395,29 +419,6 @@ def gerar_pdf_profissional(tema, audience, idioma, regiao, conteudo, sugestoes_i
             pass
         elif linha.startswith('---'):
             story.append(Spacer(1, 0.2*inch))
-        elif '|' in linha and linha.count('|') > 2:
-            # Detectar tabelas (linhas com |)
-            try:
-                rows = [cell.strip() for cell in linha.split('|') if cell.strip()]
-                if rows:
-                    table_data = [rows]
-                    table = Table(table_data, colWidths=[2*inch, 2*inch])
-                    table.setStyle(TableStyle([
-                        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#6366f1')),
-                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                        ('FONTSIZE', (0, 0), (-1, 0), 10),
-                        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-                        ('GRID', (0, 0), (-1, -1), 1, colors.black)
-                    ]))
-                    story.append(table)
-                    story.append(Spacer(1, 0.15*inch))
-            except:
-                clean_text = linha.replace('**', '').replace('*', '').strip()
-                if clean_text and len(clean_text) > 2:
-                    story.append(Paragraph(clean_text, body))
         else:
             clean_text = linha.replace('**', '').replace('*', '').replace('`', '').strip()
             if clean_text and len(clean_text) > 2:
@@ -426,7 +427,7 @@ def gerar_pdf_profissional(tema, audience, idioma, regiao, conteudo, sugestoes_i
                 except:
                     pass
     
-    # PÁGINA FINAL: IMAGENS
+    # IMAGENS
     story.append(PageBreak())
     story.append(Paragraph("SUGESTÕES DE IMAGENS PARA CANVA", heading1))
     story.append(Spacer(1, 0.2*inch))
@@ -448,6 +449,9 @@ def gerar_pdf_profissional(tema, audience, idioma, regiao, conteudo, sugestoes_i
 # INICIALIZAR STATE
 if "ebooks" not in st.session_state:
     st.session_state.ebooks = []
+
+if "page" not in st.session_state:
+    st.session_state.page = "onboarding"
 
 # TEMAS
 TEMAS = {
@@ -482,19 +486,118 @@ ESTILOS_ARTE = {
     "⬜ Minimalista": "Design minimalista e limpo",
 }
 
-# HEADER
-st.markdown("""
-    <div class="header-premium">
-        <h1>📚 Ebook Creator Pro Premium</h1>
-        <p>Com gráficos, tabelas, vetores e capítulos em páginas separadas</p>
-    </div>
-""", unsafe_allow_html=True)
+# PAGE: ONBOARDING
+if st.session_state.page == "onboarding":
+    st.markdown("""
+        <div class="onboarding-container">
+            <div class="onboarding-header">
+                <h1>Criar com IA</h1>
+                <p>Como você quer começar?</p>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # CARDS
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown("""
+            <div class="option-card">
+                <div class="card-image">📚</div>
+                <div class="card-content">
+                    <h3>Gerar</h3>
+                    <p>Criar a partir de um prompt de uma linha em poucos segundos</p>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        if st.button("Começar", key="btn_gerar", use_container_width=True):
+            st.session_state.page = "criar"
+            st.rerun()
+    
+    with col2:
+        st.markdown("""
+            <div class="option-card">
+                <div class="card-image">✏️</div>
+                <div class="card-content">
+                    <h3>Colar texto</h3>
+                    <p>Criar a partir de anotações, um esboço ou conteúdo existente</p>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        if st.button("Colar", key="btn_colar", use_container_width=True):
+            st.info("⏳ Funcionalidade em desenvolvimento!")
+    
+    with col3:
+        st.markdown("""
+            <div class="option-card">
+                <div class="card-image">📋</div>
+                <div class="card-content">
+                    <h3>Usar modelo</h3>
+                    <p>Crie usando a estrutura ou os layouts de um modelo</p>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        if st.button("Modelo", key="btn_modelo", use_container_width=True):
+            st.info("⏳ Funcionalidade em desenvolvimento!")
+    
+    with col4:
+        st.markdown("""
+            <div class="option-card">
+                <div class="card-image">📂</div>
+                <div class="card-content">
+                    <h3>Importar</h3>
+                    <p>Aprimorar documentos, apresentações ou páginas da Web existentes</p>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        if st.button("Importar", key="btn_importar", use_container_width=True):
+            st.info("⏳ Funcionalidade em desenvolvimento!")
+    
+    # PROMPTS RECENTES
+    st.markdown("""
+        <div style="margin-top: 80px;">
+        <div class="recent-prompts">
+            <h2>Seus prompts recentes</h2>
+        </div>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    recent_items = [
+        {
+            "title": "Quero que você escreva o conteúdo completo de um Infoproduto no form...",
+            "meta": "Colar texto • há 7 horas"
+        },
+        {
+            "title": "Gerar um ebook sobre maternidade real para mães portuguesas",
+            "meta": "Gerar • há 2 dias"
+        },
+        {
+            "title": "Criar tabelas de comparação e gráficos de dados para ebook",
+            "meta": "Gerar • há 3 dias"
+        }
+    ]
+    
+    for item in recent_items:
+        st.markdown(f"""
+            <div class="prompt-item">
+                <p class="prompt-title">{item['title']}</p>
+                <p class="prompt-meta">{item['meta']}</p>
+            </div>
+        """, unsafe_allow_html=True)
 
-# TABS
-tab1, tab2, tab3 = st.tabs(["✍️ Criar Ebook", "📚 Meus Ebooks", "📊 Dashboard"])
-
-# TAB 1: CRIAR EBOOK
-with tab1:
+# PAGE: CRIAR EBOOK
+elif st.session_state.page == "criar":
+    if st.button("← Voltar ao Início", key="back_criar"):
+        st.session_state.page = "onboarding"
+        st.rerun()
+    
+    st.markdown("""
+        <div class="header-premium">
+            <h1>📚 Ebook Creator Pro Premium</h1>
+            <p>Com gráficos, tabelas, vetores e capítulos em páginas separadas</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
     st.markdown('<div class="section-header"><h2>1️⃣ Configuração Básica</h2></div>', unsafe_allow_html=True)
@@ -606,14 +709,13 @@ with tab1:
                     status.text("🔄 Conectando à IA...")
                     progress_bar.progress(30)
                     
-                    # Adicionar requisitos de gráficos/tabelas
                     extras = ""
                     if incluir_graficos:
-                        extras += "- Incluir 1-2 dados/estatísticas por capítulo para gráficos\n"
+                        extras += "- Incluir 1-2 dados/estatísticas por capítulo\n"
                     if incluir_tabelas:
                         extras += "- Incluir 1 tabela/comparação por capítulo\n"
                     if incluir_vetores:
-                        extras += "- Incluir descrições de vetores/diagramas para ilustrar conceitos\n"
+                        extras += "- Incluir descrições de vetores\n"
                     
                     prompt = f"""Crie um ebook PROFISSIONAL em {idioma} sobre '{tema_desc}' para '{audience}' em {regiao}.
 
@@ -625,11 +727,11 @@ PARAMETROS:
 
 ESTRUTURA:
 - INTRODUCAO (2-3 paragrafos)
-- {num_chapters} CAPITULOS (CADA UM COM DADOS/TABELA/VETOR)
+- {num_chapters} CAPITULOS (comece cada com ### CAPITULO X:)
 - CONCLUSAO
 - BONUS: 5 dicas
 
-Escreva COMPLETAMENTE em {idioma}. IMPORTANTE: Cada capítulo deve iniciar com '### CAPÍTULO X:' e ter dados/números para gráficos."""
+Escreva em {idioma}."""
                     
                     response = model.generate_content(prompt)
                     content = response.text
@@ -639,8 +741,7 @@ Escreva COMPLETAMENTE em {idioma}. IMPORTANTE: Cada capítulo deve iniciar com '
                     
                     prompt_imagens = f"""Crie 10 prompts de imagem para '{tema_desc}' em estilo {ESTILOS_ARTE[estilo_arte_option]}.
                     
-Formato:
-[N]. [Titulo]: [Descricao em {idioma}]"""
+Formato: [N]. [Titulo]: [Descricao]"""
                     
                     response_imagens = model.generate_content(prompt_imagens)
                     sugestoes_imagens = response_imagens.text
@@ -662,16 +763,16 @@ Formato:
                     progress_bar.progress(100)
                     status.empty()
                 
-                st.markdown('<div class="success-box"><strong>✅ Ebook gerado com sucesso! Com gráficos, tabelas e capítulos em páginas separadas!</strong></div>', unsafe_allow_html=True)
+                st.markdown('<div class="success-box"><strong>✅ Ebook gerado com sucesso!</strong></div>', unsafe_allow_html=True)
                 
-                res_col1, res_col2 = st.tabs(["📖 Conteúdo", "🎨 Prompts de Imagens"])
+                res_col1, res_col2 = st.tabs(["📖 Conteúdo", "🎨 Imagens"])
                 
                 with res_col1:
-                    with st.expander("Ver Conteúdo Completo", expanded=True):
+                    with st.expander("Ver Conteúdo", expanded=True):
                         st.write(content)
                 
                 with res_col2:
-                    with st.expander("Ver Sugestões de Imagens", expanded=True):
+                    with st.expander("Ver Sugestões", expanded=True):
                         st.write(sugestoes_imagens)
                 
                 st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
@@ -681,7 +782,7 @@ Formato:
                 
                 if formato_txt:
                     with col_d1:
-                        txt = f"{tema_nome}\n\nPor Luciana Britto | L&B Marketing\n{idioma} | {regiao}\n{datetime.now().strftime('%d/%m/%Y')}\n\n{content}\n\n--- IMAGENS ---\n{sugestoes_imagens}\n\nCopyright 2026 Luciana Britto"
+                        txt = f"{tema_nome}\n\nPor Luciana Britto\n{idioma} | {regiao}\n\n{content}\n\n{sugestoes_imagens}"
                         st.download_button("📄 TXT", txt, f"{tema_nome}.txt", "text/plain", use_container_width=True)
                 
                 if formato_word:
@@ -689,9 +790,6 @@ Formato:
                         doc = Document()
                         title = doc.add_heading(tema_nome, 0)
                         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                        info = doc.add_paragraph()
-                        info.add_run(f"Por Luciana Britto | L&B Marketing\n{idioma} | {regiao}").bold = True
-                        info.alignment = WD_ALIGN_PARAGRAPH.CENTER
                         doc.add_paragraph(content)
                         doc.add_page_break()
                         doc.add_heading("Imagens Sugeridas", level=1)
@@ -705,52 +803,16 @@ Formato:
                 if formato_pdf:
                     with col_d3:
                         pdf_data = gerar_pdf_profissional(tema_nome, audience, idioma, regiao, content, sugestoes_imagens)
-                        st.download_button("🎨 PDF Premium", pdf_data, f"{tema_nome}.pdf", "application/pdf", use_container_width=True)
+                        st.download_button("🎨 PDF", pdf_data, f"{tema_nome}.pdf", "application/pdf", use_container_width=True)
                 
             except Exception as e:
                 st.error(f"❌ Erro: {str(e)}")
-
-# TAB 2: MEUS EBOOKS
-with tab2:
-    st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-    
-    if not st.session_state.ebooks:
-        st.info("📭 Nenhum ebook criado. Comece agora!")
-    else:
-        st.markdown(f"### 📚 Total: {len(st.session_state.ebooks)} Ebooks")
-        
-        for ebook in reversed(st.session_state.ebooks):
-            with st.expander(f"📖 {ebook['tema']} ({ebook['idioma']}) • {ebook['capitulos']} cap • {ebook['data']}", expanded=False):
-                col1, col2 = st.columns([3, 1])
-                with col1:
-                    st.markdown(f"**Público:** {ebook['publico']}")
-                    st.markdown(f"**Estilo:** {ebook['estilo_arte']}")
-                    st.write(ebook['conteudo'][:400] + "...")
-
-# TAB 3: DASHBOARD
-with tab3:
-    st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
-    
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.markdown(f'<div class="metric-box"><h3>{len(st.session_state.ebooks)}</h3><p>Ebooks Criados</p></div>', unsafe_allow_html=True)
-    
-    with col2:
-        total = sum([e['capitulos'] for e in st.session_state.ebooks]) if st.session_state.ebooks else 0
-        st.markdown(f'<div class="metric-box"><h3>{total}</h3><p>Capítulos</p></div>', unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown('<div class="metric-box"><h3>12</h3><p>Temas</p></div>', unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown('<div class="metric-box"><h3>∞</h3><p>Uso GRÁTIS</p></div>', unsafe_allow_html=True)
 
 # FOOTER
 st.markdown("""
     <div class="footer-custom">
         <p><strong>Luciana Britto | L&B Marketing — Estratégias de Valor</strong></p>
         <p>© 2026 • Ferramenta Premium de IA para Empreendoras</p>
-        <p style="font-size: 12px; opacity: 0.7;">Powered by Google Gemini AI + ReportLab</p>
+        <p style="font-size: 12px; opacity: 0.7;">Powered by Google Gemini AI</p>
     </div>
 """, unsafe_allow_html=True)
