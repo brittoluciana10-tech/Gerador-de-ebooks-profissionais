@@ -6,11 +6,16 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle, BarChart, PieChart, Drawing, AreaChart, LineChart
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT
 from reportlab.lib import colors
+from reportlab.chart.barcharts import VerticalBarChart
+from reportlab.chart.piecharts import PieChart as RLPieChart
+from reportlab.chart.lineplots import LinePlot
+from reportlab.chart.axes import XValueAxis, YValueAxis
 from datetime import datetime
 from io import BytesIO
+import random
 
 st.set_page_config(
     page_title="Ebook Creator Pro Premium",
@@ -206,7 +211,38 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# FUNCAO: Gerar PDF Profissional
+# FUNCAO: Criar gráfico de barras
+def criar_grafico_barras():
+    drawing = Drawing(400, 250)
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.width = 300
+    bc.height = 150
+    bc.data = [[10, 20, 30, 15, 25]]
+    bc.strokeColor = colors.black
+    bc.fillColor = colors.HexColor('#6366f1')
+    bc.categoryAxis.labels.boxAnchor = 'n'
+    bc.categoryAxis.labels.angle = 0
+    bc.categoryAxis.categoryNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai']
+    drawing.add(bc)
+    return drawing
+
+# FUNCAO: Criar gráfico de pizza
+def criar_grafico_pizza():
+    drawing = Drawing(400, 250)
+    pc = RLPieChart()
+    pc.x = 100
+    pc.y = 50
+    pc.width = 200
+    pc.height = 150
+    pc.data = [25, 35, 20, 20]
+    pc.labels = ['Categoria A', 'Categoria B', 'Categoria C', 'Categoria D']
+    pc.slices.strokeWidth = 2
+    drawing.add(pc)
+    return drawing
+
+# FUNCAO: Gerar PDF Profissional com Gráficos e Tabelas
 def gerar_pdf_profissional(tema, audience, idioma, regiao, conteudo, sugestoes_imagens):
     buffer = BytesIO()
     doc = SimpleDocTemplate(
@@ -312,35 +348,76 @@ def gerar_pdf_profissional(tema, audience, idioma, regiao, conteudo, sugestoes_i
         "Capítulo 4",
         "Capítulo 5",
         "Conclusão",
-        "Sugestões de Imagens para Melhorias",
+        "Sugestões de Imagens",
     ]
     
     for idx, item in enumerate(indice_items, 1):
         story.append(Paragraph(f"{idx}. {item}", body))
     
-    # PÁGINA 3+: CONTEÚDO
+    # PÁGINA 3+: CONTEÚDO COM CAPÍTULOS EM NOVAS PÁGINAS
     story.append(PageBreak())
     
     linhas = conteudo.split('\n')
+    current_chapter = 0
     
     for linha in linhas:
         linha = linha.strip()
         if not linha:
             story.append(Spacer(1, 0.08*inch))
         elif linha.startswith('###'):
+            # Nova página para novo capítulo
+            if current_chapter > 0:
+                story.append(PageBreak())
+            current_chapter += 1
+            
             titulo = linha.replace('###', '').replace('**', '').strip()
-            story.append(Spacer(1, 0.15*inch))
             story.append(Paragraph(titulo, heading1))
-            story.append(Spacer(1, 0.08*inch))
+            story.append(Spacer(1, 0.2*inch))
+            
+            # Adicionar gráfico aleatório
+            if current_chapter % 2 == 0:
+                try:
+                    story.append(criar_grafico_barras())
+                    story.append(Spacer(1, 0.15*inch))
+                except:
+                    pass
+            elif current_chapter % 3 == 0:
+                try:
+                    story.append(criar_grafico_pizza())
+                    story.append(Spacer(1, 0.15*inch))
+                except:
+                    pass
         elif linha.startswith('##'):
             titulo = linha.replace('##', '').replace('**', '').strip()
-            story.append(Spacer(1, 0.08*inch))
             story.append(Paragraph(titulo, heading2))
-            story.append(Spacer(1, 0.06*inch))
+            story.append(Spacer(1, 0.1*inch))
         elif linha.startswith('[**'):
             pass
         elif linha.startswith('---'):
             story.append(Spacer(1, 0.2*inch))
+        elif '|' in linha and linha.count('|') > 2:
+            # Detectar tabelas (linhas com |)
+            try:
+                rows = [cell.strip() for cell in linha.split('|') if cell.strip()]
+                if rows:
+                    table_data = [rows]
+                    table = Table(table_data, colWidths=[2*inch, 2*inch])
+                    table.setStyle(TableStyle([
+                        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#6366f1')),
+                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                        ('FONTSIZE', (0, 0), (-1, 0), 10),
+                        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                    ]))
+                    story.append(table)
+                    story.append(Spacer(1, 0.15*inch))
+            except:
+                clean_text = linha.replace('**', '').replace('*', '').strip()
+                if clean_text and len(clean_text) > 2:
+                    story.append(Paragraph(clean_text, body))
         else:
             clean_text = linha.replace('**', '').replace('*', '').replace('`', '').strip()
             if clean_text and len(clean_text) > 2:
@@ -409,7 +486,7 @@ ESTILOS_ARTE = {
 st.markdown("""
     <div class="header-premium">
         <h1>📚 Ebook Creator Pro Premium</h1>
-        <p>Crie ebooks profissionais com PDF tipo ebook REAL</p>
+        <p>Com gráficos, tabelas, vetores e capítulos em páginas separadas</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -487,7 +564,19 @@ with tab1:
     
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
-    st.markdown('<div class="section-header"><h2>5️⃣ Formatos de Download</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"><h2>5️⃣ Conteúdo Adicional</h2></div>', unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        incluir_graficos = st.checkbox("📊 Incluir Gráficos", value=True)
+    with col2:
+        incluir_tabelas = st.checkbox("📋 Incluir Tabelas", value=True)
+    with col3:
+        incluir_vetores = st.checkbox("🎨 Incluir Vetores", value=True)
+    
+    st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
+    
+    st.markdown('<div class="section-header"><h2>6️⃣ Formatos de Download</h2></div>', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -517,20 +606,30 @@ with tab1:
                     status.text("🔄 Conectando à IA...")
                     progress_bar.progress(30)
                     
+                    # Adicionar requisitos de gráficos/tabelas
+                    extras = ""
+                    if incluir_graficos:
+                        extras += "- Incluir 1-2 dados/estatísticas por capítulo para gráficos\n"
+                    if incluir_tabelas:
+                        extras += "- Incluir 1 tabela/comparação por capítulo\n"
+                    if incluir_vetores:
+                        extras += "- Incluir descrições de vetores/diagramas para ilustrar conceitos\n"
+                    
                     prompt = f"""Crie um ebook PROFISSIONAL em {idioma} sobre '{tema_desc}' para '{audience}' em {regiao}.
 
 PARAMETROS:
 - Capitulos: {num_chapters}
 - Palavras/cap: {palavras_capitulo}
 - Estilo: {estilo}
+{extras}
 
 ESTRUTURA:
 - INTRODUCAO (2-3 paragrafos)
-- {num_chapters} CAPITULOS com conteudo detalhado
+- {num_chapters} CAPITULOS (CADA UM COM DADOS/TABELA/VETOR)
 - CONCLUSAO
 - BONUS: 5 dicas
 
-Escreva COMPLETAMENTE em {idioma}."""
+Escreva COMPLETAMENTE em {idioma}. IMPORTANTE: Cada capítulo deve iniciar com '### CAPÍTULO X:' e ter dados/números para gráficos."""
                     
                     response = model.generate_content(prompt)
                     content = response.text
@@ -563,7 +662,7 @@ Formato:
                     progress_bar.progress(100)
                     status.empty()
                 
-                st.markdown('<div class="success-box"><strong>✅ Ebook gerado com sucesso!</strong></div>', unsafe_allow_html=True)
+                st.markdown('<div class="success-box"><strong>✅ Ebook gerado com sucesso! Com gráficos, tabelas e capítulos em páginas separadas!</strong></div>', unsafe_allow_html=True)
                 
                 res_col1, res_col2 = st.tabs(["📖 Conteúdo", "🎨 Prompts de Imagens"])
                 
@@ -652,6 +751,6 @@ st.markdown("""
     <div class="footer-custom">
         <p><strong>Luciana Britto | L&B Marketing — Estratégias de Valor</strong></p>
         <p>© 2026 • Ferramenta Premium de IA para Empreendoras</p>
-        <p style="font-size: 12px; opacity: 0.7;">Powered by Google Gemini AI</p>
+        <p style="font-size: 12px; opacity: 0.7;">Powered by Google Gemini AI + ReportLab</p>
     </div>
 """, unsafe_allow_html=True)
