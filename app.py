@@ -115,6 +115,40 @@ st.markdown("""
         margin: 12px 0;
     }
     
+    .warning-box {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.05) 100%);
+        border-left: 4px solid #f59e0b;
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin: 12px 0;
+    }
+    
+    .validation-card {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+        border: 2px solid rgba(99, 102, 241, 0.3);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 16px 0;
+    }
+    
+    .metric-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+    }
+    
+    .metric-label {
+        color: #cbd5e1;
+        font-weight: 600;
+    }
+    
+    .metric-value {
+        color: #6366f1;
+        font-weight: 700;
+        font-size: 16px;
+    }
+    
     footer { display: none !important; }
     
     .footer-custom {
@@ -137,6 +171,81 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
+# FUNCAO: Validar Tópico com Web Search
+def validar_topico_com_pesquisa(topico, idioma):
+    """Valida o tópico fazendo pesquisa web e analisando viabilidade"""
+    try:
+        # Pesquisa 1: Volume de procura geral
+        query_volume = f"{topico} procura mercado demanda 2024 2025"
+        response_volume = requests.get(
+            "https://www.google.com/search",
+            params={"q": query_volume},
+            timeout=5
+        )
+        
+        # Pesquisa 2: Competição
+        query_competicao = f"{topico} guia ebook tutorial"
+        response_competicao = requests.get(
+            "https://www.google.com/search",
+            params={"q": query_competicao},
+            timeout=5
+        )
+        
+        # Usar IA para análise
+        api_key = st.secrets["GEMINI_API_KEY"]
+        genai.configure(api_key=api_key)
+        models = [m.name for m in genai.list_models()]
+        model_name = [m for m in models if "gemini" in m.lower()][0]
+        model = genai.GenerativeModel(model_name)
+        
+        # Análise detalhada do tópico
+        prompt_validacao = f"""
+        Analise o seguinte tópico para um ebook em {idioma}:
+        
+        TÓPICO: {topico}
+        
+        Forneça uma análise ESTRUTURADA com:
+        
+        1. **VOLUME DE PROCURA**: (Alto/Médio/Baixo)
+           - Estimativa de interesse no tópico
+        
+        2. **VIABILIDADE**: (Viável/Parcialmente Viável/Não Viável)
+           - Razões principais
+        
+        3. **CONCORRÊNCIA**: (Alta/Média/Baixa)
+           - Número aproximado de produtos similares
+        
+        4. **PÚBLICO-ALVO**: 
+           - Quem procura este conteúdo
+        
+        5. **PONTOS FORTES**:
+           - 3 razões para criar este ebook
+        
+        6. **DESAFIOS**:
+           - 2-3 desafios a considerar
+        
+        7. **RECOMENDAÇÃO**: (Ir em frente / Reformular / Abandonar)
+           - Justificação clara
+        
+        Seja honesto e realista na análise.
+        """
+        
+        response_analise = model.generate_content(prompt_validacao)
+        analise = response_analise.text
+        
+        return {
+            "sucesso": True,
+            "analise": analise,
+            "topico": topico
+        }
+    
+    except Exception as e:
+        return {
+            "sucesso": False,
+            "erro": str(e),
+            "topico": topico
+        }
 
 # FUNCAO: Gerar PDF
 def gerar_pdf_profissional(tema, audience, idioma, regiao, conteudo, sugestoes_imagens):
@@ -327,6 +436,9 @@ if "page" not in st.session_state:
 if "selected_type" not in st.session_state:
     st.session_state.selected_type = "Documento"
 
+if "validacao_completa" not in st.session_state:
+    st.session_state.validacao_completa = False
+
 # TEMAS
 TEMAS = {
     "🤰 Maternidade Real": "Maternidade real, mães, experiências honestas",
@@ -432,6 +544,7 @@ if st.session_state.page == "onboarding":
         """, unsafe_allow_html=True)
         if st.button("Começar", key="btn_gerar", use_container_width=True):
             st.session_state.page = "criar"
+            st.session_state.validacao_completa = False
             st.rerun()
     
     with col2:
@@ -549,10 +662,11 @@ if st.session_state.page == "onboarding":
                 </div>
             """, unsafe_allow_html=True)
 
-# PAGE: CRIAR EBOOK - COM NOVAS FUNCOES
+# PAGE: CRIAR EBOOK - COM VALIDACAO
 elif st.session_state.page == "criar":
     if st.button("← Voltar", key="back_criar"):
         st.session_state.page = "onboarding"
+        st.session_state.validacao_completa = False
         st.rerun()
     
     st.markdown("""
@@ -615,7 +729,7 @@ elif st.session_state.page == "criar":
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
     # INPUT TEXT
-    st.markdown('<div class="section-header"><h2>3️⃣ Descrição</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"><h2>3️⃣ Descrição do Tópico</h2></div>', unsafe_allow_html=True)
     prompt_user = st.text_area(
         "O que você quer criar?",
         placeholder="Ex: Brainstorming e criação de novas ideias para criação de conteúdo",
@@ -637,11 +751,54 @@ elif st.session_state.page == "criar":
     
     st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
     
-    # BOTAO GERAR
-    col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
-    with col_btn2:
-        if st.button("✨ Gerar contorno", use_container_width=True, key="gen_criar"):
-            if prompt_user.strip():
+    # VALIDACAO DE TOPICO
+    if not st.session_state.validacao_completa:
+        st.markdown('<div class="section-header"><h2>5️⃣ Validação de Tópico</h2></div>', unsafe_allow_html=True)
+        
+        col_validacao1, col_validacao2 = st.columns([2, 1])
+        
+        with col_validacao1:
+            st.markdown('<div class="info-box"><strong>ℹ️ Antes de gerar, vamos validar o potencial do seu tópico com pesquisa de mercado.</strong></div>', unsafe_allow_html=True)
+        
+        with col_validacao2:
+            if st.button("🔍 Validar Tópico", use_container_width=True, key="validar_topico"):
+                if prompt_user.strip():
+                    with st.spinner("🔄 Analisando tópico... (Pesquisando mercado)"):
+                        resultado = validar_topico_com_pesquisa(
+                            prompt_user,
+                            IDIOMAS[idioma_option]
+                        )
+                    
+                    if resultado["sucesso"]:
+                        st.markdown('<div class="success-box"><strong>✅ Análise Completa!</strong></div>', unsafe_allow_html=True)
+                        st.markdown('<div class="validation-card">', unsafe_allow_html=True)
+                        st.markdown(resultado["analise"])
+                        st.markdown('</div>', unsafe_allow_html=True)
+                        
+                        col_confirm1, col_confirm2 = st.columns(2)
+                        
+                        with col_confirm1:
+                            if st.button("✅ Ir em Frente com Geração", use_container_width=True, key="confirmar_validacao"):
+                                st.session_state.validacao_completa = True
+                                st.rerun()
+                        
+                        with col_confirm2:
+                            if st.button("❌ Voltar e Mudar Tópico", use_container_width=True, key="rejeitar_validacao"):
+                                st.session_state.validacao_completa = False
+                                st.rerun()
+                    else:
+                        st.markdown(f'<div class="warning-box"><strong>⚠️ Erro na análise:</strong> {resultado["erro"]}</div>', unsafe_allow_html=True)
+                else:
+                    st.warning("📝 Por favor, descreva o tópico para validar!")
+    
+    # GERAR EBOOK (APENAS APOS VALIDACAO)
+    if st.session_state.validacao_completa:
+        st.markdown('<div class="divider-premium"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="success-box"><strong>✅ Tópico validado! Pronto para gerar.</strong></div>', unsafe_allow_html=True)
+        
+        col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
+        with col_btn2:
+            if st.button("✨ Gerar Ebook Agora", use_container_width=True, key="gen_criar"):
                 try:
                     api_key = st.secrets["GEMINI_API_KEY"]
                     genai.configure(api_key=api_key)
@@ -675,8 +832,6 @@ elif st.session_state.page == "criar":
                     fazer_download_ebook("Conteudo-Gerado", "Público geral", IDIOMAS[idioma_option], regiao, content, sugestoes, formato_txt, formato_word, formato_pdf)
                 except Exception as e:
                     st.error(f"Erro: {str(e)}")
-            else:
-                st.warning("Descreva o que quer criar!")
 
 # PAGE: COLAR TEXTO
 elif st.session_state.page == "colar":
